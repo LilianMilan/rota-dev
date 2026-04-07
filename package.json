@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "react-hook-form": "^7.72.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}
