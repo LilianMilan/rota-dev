@@ -6,14 +6,26 @@ import OpenAI from "openai";
 dotenv.config();
 
 if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY não definida no .env do backend.");
+  throw new Error("OPENAI_API_KEY não definida no ambiente.");
 }
 
 const app = express();
 
+const allowedOrigins = [
+  process.env.FRONT_URL,
+  "http://localhost:5173",
+  "https://rota-dev.vercel.app",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONT_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origem não permitida pelo CORS"));
+      }
+    },
   }),
 );
 
@@ -159,5 +171,5 @@ app.post("/generate-plan", async (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
