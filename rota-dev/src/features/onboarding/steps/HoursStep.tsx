@@ -11,7 +11,7 @@ export default function HoursStep() {
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const hoursValue = watch("hoursPerDay");
+  const hoursValue = watch("hoursPerDay") || "";
 
   return (
     <StepCard
@@ -27,7 +27,11 @@ export default function HoursStep() {
             value={option.value}
             selected={hoursValue === option.value}
             onSelect={(value) => {
-              setValue("hoursPerDay", value, { shouldValidate: true });
+              setValue("hoursPerDay", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              });
             }}
           />
         ))}

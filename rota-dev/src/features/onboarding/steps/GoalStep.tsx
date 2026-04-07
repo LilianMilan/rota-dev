@@ -11,7 +11,7 @@ export default function GoalStep() {
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const goalValue = watch("goal");
+  const goalValue = watch("goal") || "";
 
   return (
     <StepCard
@@ -27,7 +27,11 @@ export default function GoalStep() {
             value={option.value}
             selected={goalValue === option.value}
             onSelect={(value) => {
-              setValue("goal", value, { shouldValidate: true });
+              setValue("goal", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              });
             }}
           />
         ))}

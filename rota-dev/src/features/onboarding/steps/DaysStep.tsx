@@ -11,7 +11,7 @@ export default function DaysStep() {
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const daysValue = watch("daysPerWeek");
+  const daysValue = watch("daysPerWeek") || "";
 
   return (
     <StepCard
@@ -27,7 +27,11 @@ export default function DaysStep() {
             value={option.value}
             selected={daysValue === option.value}
             onSelect={(value) => {
-              setValue("daysPerWeek", value, { shouldValidate: true });
+              setValue("daysPerWeek", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              });
             }}
           />
         ))}

@@ -25,14 +25,20 @@ export function useRotaDevOnboarding() {
   const [apiError, setApiError] = useState("");
   const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
   const [plan, setPlan] = useState<StudyPlan | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
     const savedSubmittedData = localStorage.getItem(SUBMITTED_DATA_STORAGE_KEY);
 
+    let parsedPlan: StudyPlan | null = null;
+    let parsedSubmittedData: FormValues | null = null;
+
     if (savedPlan) {
       try {
-        setPlan(JSON.parse(savedPlan) as StudyPlan);
+        parsedPlan = JSON.parse(savedPlan) as StudyPlan;
+        console.log("🔥 LOADED PLAN DO LOCALSTORAGE:", parsedPlan);
+        setPlan(parsedPlan);
       } catch {
         localStorage.removeItem(PLAN_STORAGE_KEY);
       }
@@ -40,22 +46,29 @@ export function useRotaDevOnboarding() {
 
     if (savedSubmittedData) {
       try {
-        setSubmittedData(JSON.parse(savedSubmittedData) as FormValues);
+        parsedSubmittedData = JSON.parse(savedSubmittedData) as FormValues;
+        setSubmittedData(parsedSubmittedData);
       } catch {
         localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
       }
     }
-  }, []);
+
+    setHydrated(true);
+  }, [form]);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (plan) {
       localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plan));
     } else {
       localStorage.removeItem(PLAN_STORAGE_KEY);
     }
-  }, [plan]);
+  }, [plan, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (submittedData) {
       localStorage.setItem(
         SUBMITTED_DATA_STORAGE_KEY,
@@ -64,7 +77,7 @@ export function useRotaDevOnboarding() {
     } else {
       localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
     }
-  }, [submittedData]);
+  }, [submittedData, hydrated]);
 
   const currentField = ONBOARDING_FIELDS[step];
   const totalSteps = ONBOARDING_FIELDS.length;
@@ -88,16 +101,18 @@ export function useRotaDevOnboarding() {
 
   const onSubmit = async (data: FormValues) => {
     const isLastFieldValid = await form.trigger("motivation");
-
+  
     if (!isLastFieldValid) return;
-
+  
     try {
       setLoading(true);
       setApiError("");
+  
+      // NÃO limpa plan antes
       setSubmittedData(data);
-      setPlan(null);
-
+  
       const result = await generateStudyPlan(data);
+      console.log("🚀 RESULT DA API:", result);
       setPlan(result);
     } catch {
       setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");
@@ -111,7 +126,13 @@ export function useRotaDevOnboarding() {
     setApiError("");
     setSubmittedData(null);
     setStep(0);
-    form.reset();
+    form.reset({
+      goal: "",
+      level: "",
+      hoursPerDay: "",
+      daysPerWeek: "",
+      motivation: "",
+    });
 
     localStorage.removeItem(PLAN_STORAGE_KEY);
     localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
@@ -126,6 +147,7 @@ export function useRotaDevOnboarding() {
     apiError,
     submittedData,
     plan,
+    hydrated,
     nextStep,
     prevStep,
     onSubmit,

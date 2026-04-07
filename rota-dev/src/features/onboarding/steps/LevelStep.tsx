@@ -11,7 +11,7 @@ export default function LevelStep() {
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const levelValue = watch("level");
+  const levelValue = watch("level") || "";
 
   return (
     <StepCard
@@ -27,7 +27,11 @@ export default function LevelStep() {
             value={option.value}
             selected={levelValue === option.value}
             onSelect={(value) => {
-              setValue("level", value, { shouldValidate: true });
+              setValue("level", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              });
             }}
           />
         ))}

@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
+import { useEffect } from "react";
 
-import type { FormValues, StudyPlan } from "../types/onboarding";
-import { ONBOARDING_FIELDS } from "../constants/onboarding-fields";
-import { generateStudyPlan } from "../services/generateStudyPlan";
+import { useRotaDevOnboarding } from "../hooks/useRotaDevOnboarding";
 
 import GoalStep from "../steps/GoalStep";
 import LevelStep from "../steps/LevelStep";
@@ -18,68 +16,31 @@ import FormPreview from "./FormPreview";
 import ApiErrorMessage from "./ApiErrorMessage";
 
 export default function RotaDevOnboardingForm() {
-  const methods = useForm<FormValues>({
-    defaultValues: {
-      goal: "",
-      level: "",
-      hoursPerDay: "",
-      daysPerWeek: "",
-      motivation: "",
-    },
-    mode: "onSubmit",
-  });
+  const {
+    form,
+    step,
+    totalSteps,
+    progress,
+    loading,
+    apiError,
+    submittedData,
+    plan,
+    hydrated,
+    nextStep,
+    prevStep,
+    onSubmit,
+    resetFormFlow,
+  } = useRotaDevOnboarding();
 
-  const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState("");
-  const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
-  const [plan, setPlan] = useState<StudyPlan | null>(null);
-
-  const currentField = ONBOARDING_FIELDS[step];
-  const totalSteps = ONBOARDING_FIELDS.length;
-  const progress = ((step + 1) / totalSteps) * 100;
-
-  const nextStep = async () => {
-    const isValid = await methods.trigger(currentField);
-    if (!isValid) return;
-
-    if (step < totalSteps - 1) {
-      setStep((prev) => prev + 1);
+  useEffect(() => {
+    if (hydrated && submittedData) {
+      form.reset(submittedData);
     }
-  };
+  }, [hydrated, submittedData, form]);
 
-  const prevStep = () => {
-    if (step > 0 && !loading) {
-      setStep((prev) => prev - 1);
-    }
-  };
-
-  const onSubmit = async (data: FormValues) => {
-    const isLastFieldValid = await methods.trigger("motivation");
-    if (!isLastFieldValid) return;
-
-    try {
-      setLoading(true);
-      setApiError("");
-      setSubmittedData(data);
-      setPlan(null);
-
-      const result = await generateStudyPlan(data);
-      setPlan(result);
-    } catch {
-      setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetFormFlow = () => {
-    setPlan(null);
-    setApiError("");
-    setSubmittedData(null);
-    setStep(0);
-    methods.reset();
-  };
+  if (!hydrated) {
+    return null;
+  }
 
   const renderStep = () => {
     switch (step) {
@@ -104,7 +65,9 @@ export default function RotaDevOnboardingForm() {
         <HeroSection plan={plan} onReset={resetFormFlow} />
 
         <section className="rounded-[2rem] border border-white/10 bg-zinc-950 p-4 shadow-2xl sm:p-6">
-          {!plan ? (
+          {plan && plan.days?.length > 0 ? (
+            <StudyPlanResult plan={plan} onReset={resetFormFlow} />
+          ) : (
             <>
               <ProgressBar
                 step={step}
@@ -112,36 +75,35 @@ export default function RotaDevOnboardingForm() {
                 progress={progress}
               />
 
-              <FormProvider {...methods}>
-                <form onSubmit={methods.handleSubmit(onSubmit)}>
-                  {/* hidden fields */}
+              <FormProvider {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                   <input
                     type="hidden"
-                    {...methods.register("goal", {
+                    {...form.register("goal", {
                       required: "Escolha seu objetivo.",
                     })}
                   />
                   <input
                     type="hidden"
-                    {...methods.register("level", {
+                    {...form.register("level", {
                       required: "Escolha seu nível.",
                     })}
                   />
                   <input
                     type="hidden"
-                    {...methods.register("hoursPerDay", {
+                    {...form.register("hoursPerDay", {
                       required: "Escolha seu tempo por dia.",
                     })}
                   />
                   <input
                     type="hidden"
-                    {...methods.register("daysPerWeek", {
+                    {...form.register("daysPerWeek", {
                       required: "Escolha quantos dias por semana.",
                     })}
                   />
                   <input
                     type="hidden"
-                    {...methods.register("motivation", {
+                    {...form.register("motivation", {
                       required: "Escolha sua motivação.",
                     })}
                   />
@@ -181,11 +143,8 @@ export default function RotaDevOnboardingForm() {
               </FormProvider>
 
               <FormPreview data={submittedData} />
-
               <ApiErrorMessage message={apiError} />
             </>
-          ) : (
-            <StudyPlanResult plan={plan} onReset={resetFormFlow} />
           )}
         </section>
       </div>

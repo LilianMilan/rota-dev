@@ -10,12 +10,13 @@ export default function StudyPlanResult({
   plan,
   onReset,
 }: StudyPlanResultProps) {
-  const storageKey = useMemo(
-    () => `rota-dev-progress:${plan.planTitle}`,
-    [plan.planTitle],
-  );
+  const storageKey = useMemo(() => {
+    const safeTitle = plan.planTitle?.trim() || "default-plan";
+    return `rota-dev-progress:${safeTitle}`;
+  }, [plan.planTitle]);
 
   const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const savedProgress = localStorage.getItem(storageKey);
@@ -29,11 +30,15 @@ export default function StudyPlanResult({
     } else {
       setCheckedTasks({});
     }
+
+    setHydrated(true);
   }, [storageKey]);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     localStorage.setItem(storageKey, JSON.stringify(checkedTasks));
-  }, [checkedTasks, storageKey]);
+  }, [checkedTasks, storageKey, hydrated]);
 
   const handleReset = () => {
     localStorage.removeItem(storageKey);
@@ -74,7 +79,7 @@ export default function StudyPlanResult({
             <ul className="mt-4 space-y-2">
               {item.tasks?.map((task, index) => {
                 const taskKey = `${item.day}-${index}`;
-                const isChecked = checkedTasks[taskKey] || false;
+                const isChecked = checkedTasks[taskKey] ?? false;
 
                 return (
                   <li

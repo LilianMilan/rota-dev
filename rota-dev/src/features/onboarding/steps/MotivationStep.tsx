@@ -11,7 +11,7 @@ export default function MotivationStep() {
     formState: { errors },
   } = useFormContext<FormValues>();
 
-  const motivationValue = watch("motivation");
+  const motivationValue = watch("motivation") || "";
 
   return (
     <StepCard
@@ -27,7 +27,11 @@ export default function MotivationStep() {
             value={option.value}
             selected={motivationValue === option.value}
             onSelect={(value) => {
-              setValue("motivation", value, { shouldValidate: true });
+              setValue("motivation", value, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              });
             }}
           />
         ))}
