@@ -2,17 +2,21 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
-dotenv.config({ path: path.resolve(__dirname, "../.env") });
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error("OPENAI_API_KEY não definida no .env do backend.");
+}
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONT_URL || "http://localhost:5173",
+  }),
+);
+
 app.use(express.json());
 
 const client = new OpenAI({
@@ -101,16 +105,24 @@ Formato esperado:
 `;
 }
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Backend do Rota Dev está rodando 🚀");
 });
 
 app.post("/generate-plan", async (req, res) => {
   try {
+    const { goal, level, hoursPerDay, daysPerWeek, motivation } = req.body;
+
+    if (!goal || !level || !hoursPerDay || !daysPerWeek || !motivation) {
+      return res.status(400).json({
+        error: "Preencha todos os campos obrigatórios.",
+      });
+    }
+
     const prompt = buildPrompt(req.body);
 
     const response = await client.responses.create({
-      model: "gpt-5.4-mini",
+      model: "gpt-4.1-mini",
       input: prompt,
     });
 
@@ -118,7 +130,7 @@ app.post("/generate-plan", async (req, res) => {
 
     if (!text) {
       return res.status(500).json({
-        message: "A IA não retornou conteúdo.",
+        error: "A IA não retornou conteúdo.",
       });
     }
 
@@ -126,10 +138,11 @@ app.post("/generate-plan", async (req, res) => {
 
     try {
       plan = JSON.parse(text);
-    } catch (parseError) {
-      console.error("Erro ao converter resposta da IA em JSON:", text);
+    } catch {
+      console.error("Resposta inválida da IA:", text);
+
       return res.status(500).json({
-        message: "A resposta da IA veio em formato inválido.",
+        error: "A resposta da IA veio em formato inválido.",
       });
     }
 
@@ -138,11 +151,13 @@ app.post("/generate-plan", async (req, res) => {
     console.error("Erro ao gerar plano:", error);
 
     return res.status(500).json({
-      message: "Não foi possível gerar a rota agora.",
+      error: "Não foi possível gerar a rota agora.",
     });
   }
 });
 
-app.listen(3001, () => {
-  console.log("Servidor rodando em http://localhost:3001");
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
