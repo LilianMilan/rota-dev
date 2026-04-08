@@ -11,15 +11,16 @@ if (!process.env.OPENAI_API_KEY) {
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.FRONT_URL,
-  "http://localhost:5173",
-  "https://rota-dev.vercel.app",
-].filter(Boolean);
-
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    console.log("Origin recebida:", origin);
+
+    if (!origin) return callback(null, true);
+
+    if (
+      origin.includes("localhost") ||
+      origin.includes("vercel.app")
+    ) {
       return callback(null, true);
     }
 
@@ -31,22 +32,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
-
-app.options("/generate-plan", (req, res) => {
-  const origin = req.headers.origin;
-
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin || "*");
-    res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    return res.sendStatus(204);
-  }
-
-  return res.status(403).json({
-    error: "Origem não permitida pelo CORS",
-  });
-});
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -139,12 +126,6 @@ app.get("/", (_req, res) => {
 });
 
 app.post("/generate-plan", async (req, res) => {
-  const origin = req.headers.origin;
-
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin || "*");
-  }
-
   try {
     const { goal, level, hoursPerDay, daysPerWeek, motivation } = req.body;
 
@@ -175,7 +156,6 @@ app.post("/generate-plan", async (req, res) => {
       plan = JSON.parse(text);
     } catch {
       console.error("Resposta inválida da IA:", text);
-
       return res.status(500).json({
         error: "A resposta da IA veio em formato inválido.",
       });
@@ -184,7 +164,6 @@ app.post("/generate-plan", async (req, res) => {
     return res.json(plan);
   } catch (error) {
     console.error("Erro ao gerar plano:", error);
-
     return res.status(500).json({
       error: "Não foi possível gerar a rota agora.",
     });
