@@ -1,11 +1,11 @@
 import type { FormValues, StudyPlan } from "../types/onboarding";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 export async function generateStudyPlan(
   data: FormValues,
 ): Promise<StudyPlan> {
-  const response = await fetch(`${API_URL}/generate-plan`, {
+  const response = await fetch(`${API_URL}/api/generate-plan`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
