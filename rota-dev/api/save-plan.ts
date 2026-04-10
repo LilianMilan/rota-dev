@@ -22,9 +22,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
 
-  // Remove plano anterior e insere novo
-  await supabaseAdmin.from("plans").delete().eq("user_id", user.id);
-
   const { error } = await supabaseAdmin
     .from("plans")
     .insert({ user_id: user.id, content: { plan, checkedTasks } });

@@ -15,13 +15,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!user) return res.status(200).json(null);
 
-  const { data: planRow } = await supabaseAdmin
+  const { data: rows } = await supabaseAdmin
     .from("plans")
-    .select("content")
+    .select("id, content, created_at")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
+    .order("created_at", { ascending: false });
 
-  return res.status(200).json(planRow?.content ?? null);
+  return res.status(200).json(rows ?? []);
 }
