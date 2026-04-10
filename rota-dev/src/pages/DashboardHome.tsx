@@ -2,45 +2,67 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import type { StudyPlan } from "../features/onboarding/types/onboarding";
+import { useProStatus } from "../contexts/ProStatusContext";
 
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
 
 export default function DashboardHome() {
   const { user } = useUser();
+  const { isPro } = useProStatus();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("rota-dev-plan");
-      if (raw) {
-        const p = JSON.parse(raw) as StudyPlan;
-        setPlan(p);
-        const progressRaw = localStorage.getItem(PROGRESS_KEY(p.planTitle));
-        const parsedProgress = (() => {
-          try {
-            const v = JSON.parse(progressRaw ?? "[]");
-            return Array.isArray(v) ? (v as string[]) : [];
-          } catch { return []; }
-        })();
-        setCheckedTasks(parsedProgress);
+  function applyPlanAndProgress(p: StudyPlan, progress: string[]) {
+    setPlan(p);
+    setCheckedTasks(progress);
+    const firstIncomplete = p.days.findIndex(d => d.tasks.some(t => !progress.includes(t)));
+    setCurrentDayIndex(firstIncomplete >= 0 ? firstIncomplete : 0);
+  }
 
-        // Descobre o primeiro dia com tarefas incompletas
-        const firstIncomplete = p.days.findIndex(d =>
-          d.tasks.some(t => !parsedProgress.includes(t))
-        );
-        setCurrentDayIndex(firstIncomplete >= 0 ? firstIncomplete : 0);
+  useEffect(() => {
+    async function load() {
+      if (isPro && user) {
+        try {
+          const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
+          if (res.ok) {
+            const data = await res.json() as { plan: StudyPlan; checkedTasks: string[] } | null;
+            if (data?.plan) {
+              // Sincroniza localStorage com Supabase
+              localStorage.setItem("rota-dev-plan", JSON.stringify(data.plan));
+              applyPlanAndProgress(data.plan, Array.isArray(data.checkedTasks) ? data.checkedTasks : []);
+              return;
+            }
+          }
+        } catch { /* fallback localStorage */ }
       }
-    } catch { /* ignore */ }
-  }, []);
+      // Free ou fallback
+      try {
+        const raw = localStorage.getItem("rota-dev-plan");
+        if (raw) {
+          const p = JSON.parse(raw) as StudyPlan;
+          const progressRaw = localStorage.getItem(PROGRESS_KEY(p.planTitle));
+          const parsed = (() => { try { const v = JSON.parse(progressRaw ?? "[]"); return Array.isArray(v) ? v as string[] : []; } catch { return []; } })();
+          applyPlanAndProgress(p, parsed);
+        }
+      } catch { /* ignore */ }
+    }
+    void load();
+  }, [isPro, user?.id]);
 
   function toggleTask(task: string) {
     if (!plan) return;
     setCheckedTasks(prev => {
       const next = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
       localStorage.setItem(PROGRESS_KEY(plan.planTitle), JSON.stringify(next));
+      if (isPro && user) {
+        void fetch("/api/save-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clerk_id: user.id, checkedTasks: next }),
+        });
+      }
       return next;
     });
   }

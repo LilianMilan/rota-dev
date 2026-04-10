@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useUser } from "@clerk/clerk-react";
 
 import type { FormValues, StudyPlan } from "../types/onboarding";
 import { ONBOARDING_FIELDS } from "../constants/onboarding-fields";
@@ -12,6 +13,7 @@ const PLAN_COUNT_KEY = "rota-dev-plan-count";
 
 export function useRotaDevOnboarding() {
   const { isPro, refetch: refetchProStatus } = useProStatus();
+  const { user } = useUser();
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -126,16 +128,21 @@ export function useRotaDevOnboarding() {
       setSubmittedData(data);
 
       const result = await generateStudyPlan(data);
-      console.log("🚀 RESULT DA API:", result);
       setPlan(result);
 
-      // Incrementa contador de planos gerados
-      if (!isPro) {
+      if (isPro && user) {
+        // Pro: salva no Supabase
+        void fetch("/api/save-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clerk_id: user.id, plan: result, checkedTasks: [] }),
+        });
+      } else {
+        // Free: incrementa contador local
         const prev = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(PLAN_COUNT_KEY, String(prev + 1));
       }
 
-      // Atualiza status Pro caso tenha assinado
       refetchProStatus();
     } catch {
       setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");

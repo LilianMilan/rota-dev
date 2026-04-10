@@ -3,8 +3,8 @@ import { useUser } from "@clerk/clerk-react";
 import type { StudyPlan, PlanDay } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
 
-const FREE_DAY_LIMIT = 7;
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
+const FREE_DAY_LIMIT = 7;
 
 function DayCard({
   day,
@@ -189,32 +189,53 @@ function ProBanner() {
 
 export default function MeuPlano() {
   const { isPro } = useProStatus();
+  const { user } = useUser();
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("rota-dev-plan");
-      if (raw) setPlan(JSON.parse(raw));
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    if (!plan) return;
-    try {
-      const raw = localStorage.getItem(PROGRESS_KEY(plan.planTitle));
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setCheckedTasks(Array.isArray(parsed) ? parsed : []);
+    async function load() {
+      if (isPro && user) {
+        try {
+          const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
+          if (res.ok) {
+            const data = await res.json() as { plan: StudyPlan; checkedTasks: string[] } | null;
+            if (data?.plan) {
+              setPlan(data.plan);
+              setCheckedTasks(Array.isArray(data.checkedTasks) ? data.checkedTasks : []);
+              return;
+            }
+          }
+        } catch { /* fallback */ }
       }
-    } catch { /* ignore */ }
-  }, [plan]);
+      try {
+        const raw = localStorage.getItem("rota-dev-plan");
+        if (raw) {
+          const p = JSON.parse(raw) as StudyPlan;
+          setPlan(p);
+          const progressRaw = localStorage.getItem(PROGRESS_KEY(p.planTitle));
+          if (progressRaw) {
+            const parsed = JSON.parse(progressRaw);
+            setCheckedTasks(Array.isArray(parsed) ? parsed : []);
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    void load();
+  }, [isPro, user?.id]);
 
   function toggleTask(task: string) {
     if (!plan) return;
     setCheckedTasks(prev => {
       const next = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
       localStorage.setItem(PROGRESS_KEY(plan.planTitle), JSON.stringify(next));
+      if (isPro && user) {
+        void fetch("/api/save-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clerk_id: user.id, checkedTasks: next }),
+        });
+      }
       return next;
     });
   }
