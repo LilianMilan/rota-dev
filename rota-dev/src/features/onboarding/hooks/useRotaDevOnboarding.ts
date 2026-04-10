@@ -111,12 +111,19 @@ export function useRotaDevOnboarding() {
 
     if (!isLastFieldValid) return;
 
-    // Verifica limite de planos para usuários free
+    // Verifica limite de planos
     if (!isPro) {
       const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
-      if (count >= 1) {
-        setShowGenerationPaywall(true);
-        return;
+      if (count >= 1) { setShowGenerationPaywall(true); return; }
+    } else if (user) {
+      // Pro: máx 4 planos por mês
+      const res = await fetch(`/api/plan-count-month?clerk_id=${user.id}`);
+      if (res.ok) {
+        const { count } = await res.json() as { count: number };
+        if (count >= 4) {
+          setApiError("Você já gerou 4 planos este mês. Limite renova no primeiro dia do próximo mês.");
+          return;
+        }
       }
     }
 
@@ -131,7 +138,6 @@ export function useRotaDevOnboarding() {
       setPlan(result);
 
       if (isPro && user) {
-        // Pro: salva no Supabase
         void fetch("/api/save-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -22,6 +22,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
 
+  // Limite: 4 planos por mês
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const { count } = await supabaseAdmin
+    .from("plans")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", startOfMonth.toISOString());
+
+  if ((count ?? 0) >= 4) {
+    return res.status(429).json({ error: "Limite de 4 planos por mês atingido. Tente novamente no mês que vem." });
+  }
+
   const { error } = await supabaseAdmin
     .from("plans")
     .insert({ user_id: user.id, content: { plan, checkedTasks } });
