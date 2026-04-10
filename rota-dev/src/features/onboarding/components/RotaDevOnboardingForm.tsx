@@ -33,6 +33,7 @@ export default function RotaDevOnboardingForm() {
     resetFormFlow,
     showGenerationPaywall,
     setShowGenerationPaywall,
+    monthlyLimitReached,
   } = useRotaDevOnboarding();
 
   useEffect(() => {
@@ -78,6 +79,18 @@ export default function RotaDevOnboardingForm() {
             <StudyPlanResult plan={plan} onReset={resetFormFlow} />
           ) : (
             <>
+              {monthlyLimitReached && (
+                <div style={{
+                  background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.3)",
+                  borderRadius: "12px", padding: "14px 16px", marginBottom: "1.25rem",
+                  display: "flex", alignItems: "center", gap: "10px",
+                }}>
+                  <span style={{ fontSize: "18px" }}>⚠️</span>
+                  <p style={{ fontSize: "13px", color: "#f97316", margin: 0 }}>
+                    Você já gerou 4 planos este mês. O limite renova no dia 1 do próximo mês.
+                  </p>
+                </div>
+              )}
               <ProgressBar
                 step={step}
                 totalSteps={totalSteps}
@@ -141,8 +154,8 @@ export default function RotaDevOnboardingForm() {
                     ) : (
                       <button
                         type="submit"
-                        disabled={loading}
-                        className="rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white"
+                        disabled={loading || monthlyLimitReached}
+                        className="rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         {loading ? "Gerando sua rota..." : "Gerar minha rota"}
                       </button>

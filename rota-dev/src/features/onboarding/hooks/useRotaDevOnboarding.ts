@@ -33,6 +33,16 @@ export function useRotaDevOnboarding() {
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [showGenerationPaywall, setShowGenerationPaywall] = useState(false);
+  const [monthlyLimitReached, setMonthlyLimitReached] = useState(false);
+
+  // Verifica limite mensal Pro ao entrar na página
+  useEffect(() => {
+    if (!isPro || !user) return;
+    void fetch(`/api/plan-count-month?clerk_id=${user.id}`)
+      .then(r => r.json())
+      .then((d: { count: number }) => { if (d.count >= 4) setMonthlyLimitReached(true); })
+      .catch(() => {});
+  }, [isPro, user?.id]);
 
   useEffect(() => {
     const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
@@ -191,5 +201,6 @@ export function useRotaDevOnboarding() {
     resetFormFlow,
     showGenerationPaywall,
     setShowGenerationPaywall,
+    monthlyLimitReached,
   };
 }
