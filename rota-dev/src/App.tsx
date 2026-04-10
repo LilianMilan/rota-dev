@@ -1,9 +1,71 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import LoginPage from "./pages/LoginPage";
+import SSOCallback from "./pages/SSOCallback";
+import Dashboard from "./pages/Dashboard";
 import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboardingForm";
+import foxImg from "./assets/fox.png";
 
-function App() {
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) return null;
+  if (!isSignedIn) return <Navigate to="/" replace />;
+
+  return <>{children}</>;
+}
+
+function AppLayout() {
+  const { signOut } = useClerk();
+  const { user } = useUser();
+
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
+      <header
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          zIndex: 100,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0.75rem 2rem",
+          background: "#0f0f0f",
+          borderBottom: "1px solid #1a1a1a",
+        }}
+      >
+        {/* Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img src={foxImg} alt="Rota Dev" style={{ width: "32px", height: "32px", borderRadius: "8px" }} />
+          <span style={{ fontSize: "15px", fontWeight: 600, color: "#fff" }}>
+            Rota<span style={{ color: "#f97316" }}>Dev</span>
+          </span>
+        </div>
+
+        {/* Avatar + nome + sair */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {user?.imageUrl && (
+            <img
+              src={user.imageUrl}
+              alt={user.firstName ?? ""}
+              style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", border: "1px solid #2a2a2a" }}
+            />
+          )}
+          <span style={{ fontSize: "13px", color: "#555" }}>{user?.firstName}</span>
+          <span style={{ color: "#222", fontSize: "12px" }}>|</span>
+          <button
+            onClick={() => signOut({ redirectUrl: "/" })}
+            style={{ fontSize: "13px", color: "#444", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+      <main className="flex-1" style={{ paddingTop: "72px" }}>
         <RotaDevOnboardingForm />
       </main>
 
@@ -21,6 +83,27 @@ function App() {
         </a>
       </footer>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route
+          path="/app"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/sso-callback" element={<SSOCallback />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

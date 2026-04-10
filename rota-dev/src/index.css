@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+html, body, #root {
+  background: #0f0f0f;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0px) rotate(-2deg); }
+  50%  { transform: translateY(-10px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(-2deg); }
+}
+
+.fox-float {
+  animation: float 3s ease-in-out infinite;
+}
