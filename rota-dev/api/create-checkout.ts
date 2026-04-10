@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Stripe não configurado." });
   }
 
-  const stripe = new Stripe(secretKey, { apiVersion: "2025-03-31.basil" });
+  const stripe = new Stripe(secretKey, { apiVersion: "2026-03-25.dahlia" as const });
 
   try {
     const session = await stripe.checkout.sessions.create({
