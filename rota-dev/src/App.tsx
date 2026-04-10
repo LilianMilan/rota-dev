@@ -5,7 +5,7 @@ import SSOCallback from "./pages/SSOCallback";
 import Dashboard from "./pages/Dashboard";
 import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboardingForm";
 import foxImg from "./assets/fox.png";
-import { ProStatusProvider } from "./contexts/ProStatusContext";
+import { ProStatusProvider, useProStatus } from "./contexts/ProStatusContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -24,6 +24,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppLayout() {
   const { signOut } = useClerk();
   const { user } = useUser();
+  const { isPro, loading } = useProStatus();
+
+  // Pro user não precisa do onboarding — vai direto pro dashboard
+  if (!loading && isPro) return <Navigate to="/dashboard" replace />;
 
   return (
     <div className="min-h-screen flex flex-col">
