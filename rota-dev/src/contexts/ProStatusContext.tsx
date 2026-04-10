@@ -60,9 +60,18 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     if (!user) { setLoading(false); return; }
 
-    // Se acabou de pagar, persiste Pro imediatamente (não espera webhook)
     const justSubscribed = new URLSearchParams(window.location.search).get("subscribed") === "true";
-    if (justSubscribed) updateIsPro(true);
+
+    if (justSubscribed) {
+      // Marca Pro imediatamente (otimista) e confirma direto no Stripe
+      updateIsPro(true);
+      const email = user.primaryEmailAddress?.emailAddress ?? "";
+      void fetch("/api/confirm-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clerk_id: user.id, email }),
+      });
+    }
 
     void syncAndFetch();
   }, [isLoaded, user?.id]);
