@@ -5,7 +5,23 @@ import SSOCallback from "./pages/SSOCallback";
 import Dashboard from "./pages/Dashboard";
 import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboardingForm";
 import foxImg from "./assets/fox.png";
-import { ProStatusProvider } from "./contexts/ProStatusContext";
+import { ProStatusProvider, useProStatus } from "./contexts/ProStatusContext";
+import RenewalPage from "./pages/RenewalPage";
+
+// Bloqueia dashboard se assinatura expirou
+function ProRoute({ children }: { children: React.ReactNode }) {
+  const { isPro, loading } = useProStatus();
+
+  if (loading) return (
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "32px", height: "32px", border: "3px solid #1e1e1e", borderTop: "3px solid #f97316", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+  if (!isPro) return <RenewalPage />;
+
+  return <>{children}</>;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -106,7 +122,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/*" element={<ProtectedRoute><ProRoute><Dashboard /></ProRoute></ProtectedRoute>} />
           <Route path="/sso-callback" element={<SSOCallback />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
