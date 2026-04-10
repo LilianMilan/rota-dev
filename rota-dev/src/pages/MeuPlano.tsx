@@ -10,13 +10,12 @@ const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
 
 function DayCard({
   day,
-  done,
   locked,
   checkedTasks,
   onToggle,
 }: {
   day: PlanDay;
-  done: boolean;
+  done?: boolean;
   locked: boolean;
   checkedTasks: string[];
   onToggle: (task: string) => void;
