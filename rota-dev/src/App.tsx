@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import LoginPage from "./pages/LoginPage";
 import SSOCallback from "./pages/SSOCallback";
@@ -40,6 +40,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppLayout() {
   const { signOut } = useClerk();
   const { user } = useUser();
+  const { isPro, loading } = useProStatus();
+  const [searchParams] = useSearchParams();
+
+  // Pro user só acessa /app se veio via botão "Regenerar"
+  if (!loading && isPro && searchParams.get("regenerar") !== "true") {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

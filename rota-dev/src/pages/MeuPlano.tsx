@@ -276,7 +276,7 @@ export default function MeuPlano() {
         </div>
         {isPro && (
           <button
-            onClick={() => window.location.href = "/app"}
+            onClick={() => window.location.href = "/app?regenerar=true"}
             style={{
               padding: "8px 16px", background: "rgba(249,115,22,0.1)",
               border: "1px solid rgba(249,115,22,0.3)", borderRadius: "10px",
