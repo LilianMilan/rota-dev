@@ -18,12 +18,18 @@ export default function DashboardHome() {
       if (raw) {
         const p = JSON.parse(raw) as StudyPlan;
         setPlan(p);
-        const progress = localStorage.getItem(PROGRESS_KEY(p.planTitle));
-        if (progress) setCheckedTasks(JSON.parse(progress));
+        const progressRaw = localStorage.getItem(PROGRESS_KEY(p.planTitle));
+        const parsedProgress = (() => {
+          try {
+            const v = JSON.parse(progressRaw ?? "[]");
+            return Array.isArray(v) ? (v as string[]) : [];
+          } catch { return []; }
+        })();
+        setCheckedTasks(parsedProgress);
 
         // Descobre o primeiro dia com tarefas incompletas
         const firstIncomplete = p.days.findIndex(d =>
-          d.tasks.some(t => !(JSON.parse(progress ?? "[]") as string[]).includes(t))
+          d.tasks.some(t => !parsedProgress.includes(t))
         );
         setCurrentDayIndex(firstIncomplete >= 0 ? firstIncomplete : 0);
       }
