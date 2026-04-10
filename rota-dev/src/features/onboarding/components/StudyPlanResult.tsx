@@ -119,13 +119,39 @@ export default function StudyPlanResult({ plan, onReset }: StudyPlanResultProps)
         )}
       </div>
 
-      <button
-        type="button"
-        onClick={handleReset}
-        className="mt-6 w-full rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
-      >
-        Gerar uma nova rota
-      </button>
+      {isPro ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "1.5rem" }}>
+          <button
+            type="button"
+            onClick={() => window.location.href = "/dashboard"}
+            style={{
+              width: "100%", padding: "12px", background: "#f97316",
+              border: "none", borderRadius: "16px", color: "#fff",
+              fontSize: "14px", fontWeight: 600, cursor: "pointer",
+              transition: "opacity 0.15s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          >
+            Ver meu plano no Dashboard →
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="w-full rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+          >
+            Gerar uma nova rota
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleReset}
+          className="mt-6 w-full rounded-2xl border border-white/10 px-5 py-3 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
+        >
+          Gerar uma nova rota
+        </button>
+      )}
     </div>
   );
 }
