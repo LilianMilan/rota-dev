@@ -14,6 +14,7 @@ import HeroSection from "./HeroSection";
 import StudyPlanResult from "./StudyPlanResult";
 import FormPreview from "./FormPreview";
 import ApiErrorMessage from "./ApiErrorMessage";
+import PaywallModal from "./PaywallModal";
 
 export default function RotaDevOnboardingForm() {
   const {
@@ -30,6 +31,8 @@ export default function RotaDevOnboardingForm() {
     prevStep,
     onSubmit,
     resetFormFlow,
+    showGenerationPaywall,
+    setShowGenerationPaywall,
   } = useRotaDevOnboarding();
 
   useEffect(() => {
@@ -61,6 +64,13 @@ export default function RotaDevOnboardingForm() {
 
   return (
     <main className="min-h-screen bg-[#0F0F0F] px-4 py-10 text-white">
+      {showGenerationPaywall && (
+        <PaywallModal
+          blockFree
+          onSubscribe={() => setShowGenerationPaywall(false)}
+          onContinueFree={() => setShowGenerationPaywall(false)}
+        />
+      )}
       <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         <HeroSection plan={plan} onReset={resetFormFlow} />
 

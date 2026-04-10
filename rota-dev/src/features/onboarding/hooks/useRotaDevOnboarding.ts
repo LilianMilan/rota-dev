@@ -7,6 +7,10 @@ import { generateStudyPlan } from "../services/generateStudyPlan";
 
 const PLAN_STORAGE_KEY = "rota-dev-plan";
 const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
+const PLAN_COUNT_KEY = "rota-dev-plan-count";
+
+// Mock — futuramente virá do Stripe/Supabase
+const IS_PRO = false;
 
 export function useRotaDevOnboarding() {
   const form = useForm<FormValues>({
@@ -26,6 +30,7 @@ export function useRotaDevOnboarding() {
   const [submittedData, setSubmittedData] = useState<FormValues | null>(null);
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [showGenerationPaywall, setShowGenerationPaywall] = useState(false);
 
   useEffect(() => {
     const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
@@ -101,19 +106,34 @@ export function useRotaDevOnboarding() {
 
   const onSubmit = async (data: FormValues) => {
     const isLastFieldValid = await form.trigger("motivation");
-  
+
     if (!isLastFieldValid) return;
-  
+
+    // Verifica limite de planos para usuários free
+    if (!IS_PRO) {
+      const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
+      if (count >= 1) {
+        setShowGenerationPaywall(true);
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setApiError("");
-  
+
       // NÃO limpa plan antes
       setSubmittedData(data);
-  
+
       const result = await generateStudyPlan(data);
       console.log("🚀 RESULT DA API:", result);
       setPlan(result);
+
+      // Incrementa contador de planos gerados
+      if (!IS_PRO) {
+        const prev = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
+        localStorage.setItem(PLAN_COUNT_KEY, String(prev + 1));
+      }
     } catch {
       setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");
     } finally {
@@ -136,6 +156,7 @@ export function useRotaDevOnboarding() {
 
     localStorage.removeItem(PLAN_STORAGE_KEY);
     localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
+    // NÃO remove PLAN_COUNT_KEY — o limite persiste entre resets
   };
 
   return {
@@ -152,5 +173,7 @@ export function useRotaDevOnboarding() {
     prevStep,
     onSubmit,
     resetFormFlow,
+    showGenerationPaywall,
+    setShowGenerationPaywall,
   };
 }

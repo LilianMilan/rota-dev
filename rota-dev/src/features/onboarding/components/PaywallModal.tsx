@@ -8,9 +8,10 @@ const BULLETS = [
 type PaywallModalProps = {
   onSubscribe: () => void;
   onContinueFree: () => void;
+  blockFree?: boolean;
 };
 
-export default function PaywallModal({ onSubscribe, onContinueFree }: PaywallModalProps) {
+export default function PaywallModal({ onSubscribe, onContinueFree, blockFree = false }: PaywallModalProps) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 1000,
@@ -81,16 +82,19 @@ export default function PaywallModal({ onSubscribe, onContinueFree }: PaywallMod
 
         {/* Link free */}
         <button
-          onClick={onContinueFree}
+          onClick={blockFree ? undefined : onContinueFree}
+          disabled={blockFree}
           style={{
             background: "transparent", border: "none",
-            color: "#444", fontSize: "12px", cursor: "pointer",
+            color: blockFree ? "#2a2a2a" : "#444",
+            fontSize: "12px",
+            cursor: blockFree ? "not-allowed" : "pointer",
             transition: "color 0.15s",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#888")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+          onMouseEnter={e => { if (!blockFree) e.currentTarget.style.color = "#888"; }}
+          onMouseLeave={e => { if (!blockFree) e.currentTarget.style.color = "#444"; }}
         >
-          Continuar com o plano free
+          {blockFree ? "Assine para continuar gerando planos" : "Continuar com o plano free"}
         </button>
       </div>
     </div>
