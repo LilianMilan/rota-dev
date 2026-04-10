@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import "./Dashboard.css";
+import { useProStatus } from "../contexts/ProStatusContext";
 
 import DashboardHome from "./DashboardHome";
 import MeuPlano from "./MeuPlano";
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { user } = useUser();
+  const { isPro } = useProStatus();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -79,13 +81,15 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <p style={{ fontSize: "12px", color: "#ccc", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {user?.firstName} {user?.lastName}
           </p>
-          <span style={{
-            fontSize: "10px", fontWeight: 600, color: "#f97316",
-            background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.3)",
-            borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.05em",
-          }}>
-            PRO
-          </span>
+          {isPro && (
+            <span style={{
+              fontSize: "10px", fontWeight: 600, color: "#f97316",
+              background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.3)",
+              borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.05em",
+            }}>
+              PRO
+            </span>
+          )}
         </div>
       </div>
       </div>
