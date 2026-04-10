@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useUser } from "@clerk/clerk-react";
 import type { StudyPlan, PlanDay } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
 
@@ -136,7 +136,28 @@ function DayCard({
 }
 
 function ProBanner() {
-  const navigate = useNavigate();
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubscribe() {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerk_id: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
+        }),
+      });
+      const data = await res.json() as { url?: string };
+      if (data.url) window.location.href = data.url;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{
       background: "linear-gradient(135deg, #111 0%, #1a0f00 100%)",
@@ -153,16 +174,18 @@ function ProBanner() {
         pode regenerar e ajustar seu plano a qualquer momento.
       </p>
       <button
-        onClick={() => navigate("/paywall")}
+        onClick={handleSubscribe}
+        disabled={loading}
         style={{
           padding: "12px 28px", background: "#f97316", border: "none",
           borderRadius: "10px", color: "#fff", fontSize: "14px", fontWeight: 600,
-          cursor: "pointer", transition: "opacity 0.15s",
+          cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1,
+          transition: "opacity 0.15s",
         }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-        onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+        onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.85"; }}
+        onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
       >
-        Assinar Pro — R$19/mês
+        {loading ? "Aguarde..." : "Assinar Pro — R$12,90/mês"}
       </button>
     </div>
   );
@@ -186,7 +209,10 @@ export default function MeuPlano() {
     if (!plan) return;
     try {
       const raw = localStorage.getItem(PROGRESS_KEY(plan.planTitle));
-      if (raw) setCheckedTasks(JSON.parse(raw));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setCheckedTasks(Array.isArray(parsed) ? parsed : []);
+      }
     } catch { /* ignore */ }
   }, [plan]);
 
