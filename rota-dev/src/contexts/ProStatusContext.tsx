@@ -52,6 +52,11 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) { setLoading(false); return; }
+
+    // Se o usuário acabou de pagar, já seta Pro otimisticamente
+    const justSubscribed = new URLSearchParams(window.location.search).get("subscribed") === "true";
+    if (justSubscribed) setIsPro(true);
+
     void syncAndFetch();
   }, [isLoaded, user?.id]);
 
