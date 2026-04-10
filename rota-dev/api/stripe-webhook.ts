@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
-import { supabaseAdmin } from "./_supabase";
+import { supabaseAdmin } from "./_supabase.js";
 
 // Desabilita o body parser do Vercel — o Stripe precisa do raw body para validar a assinatura
 export const config = { api: { bodyParser: false } };
@@ -49,11 +49,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const subscription = event.data.object as Stripe.Subscription;
     const customer = await stripe.customers.retrieve(subscription.customer as string);
 
-    if (!customer.deleted && customer.email) {
-      await supabaseAdmin
-        .from("users")
-        .update({ is_pro: false })
-        .eq("email", customer.email);
+    if (!customer.deleted) {
+      const email = (customer as Stripe.Customer).email;
+      if (email) {
+        await supabaseAdmin
+          .from("users")
+          .update({ is_pro: false })
+          .eq("email", email);
+      }
     }
   }
 
