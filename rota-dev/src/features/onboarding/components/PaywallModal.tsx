@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+
 const BULLETS = [
   "Plano completo de 90 dias",
   "Chat com agente de IA",
@@ -6,12 +9,41 @@ const BULLETS = [
 ];
 
 type PaywallModalProps = {
-  onSubscribe: () => void;
   onContinueFree: () => void;
   blockFree?: boolean;
 };
 
-export default function PaywallModal({ onSubscribe, onContinueFree, blockFree = false }: PaywallModalProps) {
+export default function PaywallModal({ onContinueFree, blockFree = false }: PaywallModalProps) {
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubscribe() {
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerk_id: user?.id,
+          email: user?.primaryEmailAddress?.emailAddress,
+        }),
+      });
+
+      const data = await res.json() as { url?: string; error?: string };
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ?? "Erro ao criar sessão de pagamento.");
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 1000,
@@ -65,19 +97,27 @@ export default function PaywallModal({ onSubscribe, onContinueFree, blockFree = 
           <p style={{ fontSize: "11px", color: "#555" }}>cancele quando quiser</p>
         </div>
 
+        {/* Erro de checkout */}
+        {error && (
+          <p style={{ fontSize: "12px", color: "#ef4444", marginBottom: "10px" }}>{error}</p>
+        )}
+
         {/* Botão assinar */}
         <button
-          onClick={onSubscribe}
+          onClick={handleSubscribe}
+          disabled={loading}
           style={{
             width: "100%", padding: "13px", background: "#f97316",
             border: "none", borderRadius: "12px", color: "#fff",
-            fontSize: "14px", fontWeight: 700, cursor: "pointer",
+            fontSize: "14px", fontWeight: 700,
+            cursor: loading ? "not-allowed" : "pointer",
             marginBottom: "12px", transition: "opacity 0.15s",
+            opacity: loading ? 0.7 : 1,
           }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
-          onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.88"; }}
+          onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
         >
-          Assinar agora →
+          {loading ? "Redirecionando..." : "Assinar agora →"}
         </button>
 
         {/* Link free */}

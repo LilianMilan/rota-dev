@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { StudyPlan } from "../types/onboarding";
 import PaywallModal from "./PaywallModal";
+import { useProStatus } from "../../../contexts/ProStatusContext";
 
 type StudyPlanResultProps = {
   plan: StudyPlan;
@@ -18,7 +19,7 @@ export default function StudyPlanResult({ plan, onReset }: StudyPlanResultProps)
   const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
   const [hydrated, setHydrated] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
-  const [isPro] = useState(false); // mock — futuramente virá do Stripe
+  const { isPro } = useProStatus();
 
   useEffect(() => {
     const savedProgress = localStorage.getItem(storageKey);
@@ -55,7 +56,6 @@ export default function StudyPlanResult({ plan, onReset }: StudyPlanResultProps)
     <div style={{ position: "relative" }}>
       {showPaywall && (
         <PaywallModal
-          onSubscribe={() => setShowPaywall(false)}
           onContinueFree={() => setShowPaywall(false)}
         />
       )}

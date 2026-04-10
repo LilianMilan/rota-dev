@@ -4,15 +4,15 @@ import { useForm } from "react-hook-form";
 import type { FormValues, StudyPlan } from "../types/onboarding";
 import { ONBOARDING_FIELDS } from "../constants/onboarding-fields";
 import { generateStudyPlan } from "../services/generateStudyPlan";
+import { useProStatus } from "../../../contexts/ProStatusContext";
 
 const PLAN_STORAGE_KEY = "rota-dev-plan";
 const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
 const PLAN_COUNT_KEY = "rota-dev-plan-count";
 
-// Mock — futuramente virá do Stripe/Supabase
-const IS_PRO = false;
-
 export function useRotaDevOnboarding() {
+  const { isPro, refetch: refetchProStatus } = useProStatus();
+
   const form = useForm<FormValues>({
     defaultValues: {
       goal: "",
@@ -110,7 +110,7 @@ export function useRotaDevOnboarding() {
     if (!isLastFieldValid) return;
 
     // Verifica limite de planos para usuários free
-    if (!IS_PRO) {
+    if (!isPro) {
       const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
       if (count >= 1) {
         setShowGenerationPaywall(true);
@@ -130,10 +130,13 @@ export function useRotaDevOnboarding() {
       setPlan(result);
 
       // Incrementa contador de planos gerados
-      if (!IS_PRO) {
+      if (!isPro) {
         const prev = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(PLAN_COUNT_KEY, String(prev + 1));
       }
+
+      // Atualiza status Pro caso tenha assinado
+      refetchProStatus();
     } catch {
       setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");
     } finally {

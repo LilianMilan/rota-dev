@@ -5,6 +5,7 @@ import SSOCallback from "./pages/SSOCallback";
 import Dashboard from "./pages/Dashboard";
 import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboardingForm";
 import foxImg from "./assets/fox.png";
+import { ProStatusProvider } from "./contexts/ProStatusContext";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();
@@ -89,20 +90,22 @@ function AppLayout() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route
-          path="/app"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/sso-callback" element={<SSOCallback />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ProStatusProvider>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/sso-callback" element={<SSOCallback />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ProStatusProvider>
     </BrowserRouter>
   );
 }

@@ -67,7 +67,6 @@ export default function RotaDevOnboardingForm() {
       {showGenerationPaywall && (
         <PaywallModal
           blockFree
-          onSubscribe={() => setShowGenerationPaywall(false)}
           onContinueFree={() => setShowGenerationPaywall(false)}
         />
       )}

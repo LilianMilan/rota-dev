@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { StudyPlan, PlanDay } from "../features/onboarding/types/onboarding";
-
-// Mock — futuramente virá do Stripe/Supabase
-const HAS_PRO = true;
+import { useProStatus } from "../contexts/ProStatusContext";
 
 const FREE_DAY_LIMIT = 7;
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
@@ -171,6 +169,7 @@ function ProBanner() {
 }
 
 export default function MeuPlano() {
+  const { isPro: HAS_PRO } = useProStatus();
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(0);
