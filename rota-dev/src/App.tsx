@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import LoginPage from "./pages/LoginPage";
+import LandingPage from "./pages/LandingPage";
 import SSOCallback from "./pages/SSOCallback";
 import Dashboard from "./pages/Dashboard";
 import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboardingForm";
@@ -32,7 +33,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-  if (!isSignedIn) return <Navigate to="/" replace />;
+  if (!isSignedIn) return <Navigate to="/login" replace />;
 
   return <>{children}</>;
 }
@@ -120,7 +121,8 @@ function App() {
     <BrowserRouter>
       <ProStatusProvider>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route
             path="/app"
             element={
