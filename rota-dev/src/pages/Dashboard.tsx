@@ -10,10 +10,38 @@ import AgenteIA from "./AgenteIA";
 import Progresso from "./Progresso";
 
 const NAV_ITEMS = [
-  { icon: "⊞", label: "Início",    path: "/dashboard" },
-  { icon: "📋", label: "Meu plano", path: "/dashboard/plano" },
-  { icon: "🤖", label: "Agente IA", path: "/dashboard/agente" },
-  { icon: "📈", label: "Progresso", path: "/dashboard/progresso" },
+  {
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+    ),
+    label: "Início", path: "/dashboard",
+  },
+  {
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+    ),
+    label: "Meu plano", path: "/dashboard/plano",
+  },
+  {
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+      </svg>
+    ),
+    label: "Agente IA", path: "/dashboard/agente",
+  },
+  {
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    ),
+    label: "Progresso", path: "/dashboard/progresso",
+  },
 ];
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
