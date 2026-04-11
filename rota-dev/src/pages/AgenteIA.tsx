@@ -19,19 +19,34 @@ export default function AgenteIA() {
   }, [messages]);
 
   async function sendMessage() {
-    if (!input.trim()) return;
+    if (!input.trim() || !user) return;
     const userMsg: Message = { role: "user", text: input.trim() };
-    setMessages(prev => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput("");
     setLoading(true);
 
-    // Placeholder — futuramente chama a API real
-    await new Promise(r => setTimeout(r, 1200));
-    setMessages(prev => [...prev, {
-      role: "agent",
-      text: "Ótima pergunta! Em breve o agente estará totalmente conectado com sua trilha. Por enquanto estou em modo demonstração. 🚀",
-    }]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/agent-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clerk_id: user.id,
+          messages: updatedMessages
+            .filter(m => m.role !== "agent" || updatedMessages.indexOf(m) > 0)
+            .map(m => ({ role: m.role === "agent" ? "assistant" : "user", content: m.text })),
+        }),
+      });
+      const data = await res.json() as { reply?: string; error?: string };
+      setMessages(prev => [...prev, {
+        role: "agent",
+        text: data.reply ?? "Não consegui responder agora. Tenta de novo.",
+      }]);
+    } catch {
+      setMessages(prev => [...prev, { role: "agent", text: "Erro de conexão. Tenta de novo." }]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
