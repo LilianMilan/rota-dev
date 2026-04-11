@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Routes, Route } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useClerk } from "@clerk/clerk-react";
 import "./Dashboard.css";
 import { useProStatus } from "../contexts/ProStatusContext";
 
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
 
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { user } = useUser();
+  const { signOut } = useClerk();
   const { isPro } = useProStatus();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -91,6 +92,15 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             </span>
           )}
         </div>
+        <button
+          onClick={() => signOut({ redirectUrl: "/" })}
+          title="Sair"
+          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", fontSize: "14px", padding: "4px", flexShrink: 0 }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+        >
+          ⏻
+        </button>
       </div>
       </div>
     </div>

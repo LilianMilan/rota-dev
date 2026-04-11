@@ -113,7 +113,7 @@ export default function Progresso() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: "2rem" }}>
+      <div className="stats-grid-4">
         {STATS.map(s => (
           <div key={s.label} style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: "14px", padding: "1.25rem" }}>
             <p style={{ fontSize: "11px", color: "#555", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.label}</p>

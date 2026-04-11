@@ -101,9 +101,8 @@ export default function LoginPage() {
         )?.emailAddressId ?? "",
       });
       setStep("verify");
-    } catch (err: unknown) {
+    } catch {
       setError("Não foi possível enviar o código. Verifique o e-mail.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -243,8 +242,8 @@ export default function LoginPage() {
 
           <p className="text-xs text-zinc-700 mt-6 text-center leading-relaxed">
             Ao entrar, você concorda com os{" "}
-            <span className="text-orange-500 cursor-pointer">Termos</span> e{" "}
-            <span className="text-orange-500 cursor-pointer">Privacidade</span>.
+            <a href="/terms" className="text-orange-500 hover:text-orange-400 transition-colors">Termos</a> e{" "}
+            <a href="/privacy" className="text-orange-500 hover:text-orange-400 transition-colors">Privacidade</a>.
           </p>
         </div>
       </div>

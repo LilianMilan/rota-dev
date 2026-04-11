@@ -8,6 +8,8 @@ import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboa
 import foxImg from "./assets/fox.png";
 import { ProStatusProvider, useProStatus } from "./contexts/ProStatusContext";
 import RenewalPage from "./pages/RenewalPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 // Bloqueia dashboard se assinatura expirou
 function ProRoute({ children }: { children: React.ReactNode }) {
@@ -133,6 +135,8 @@ function App() {
           />
           <Route path="/dashboard/*" element={<ProtectedRoute><ProRoute><Dashboard /></ProRoute></ProtectedRoute>} />
           <Route path="/sso-callback" element={<SSOCallback />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ProStatusProvider>

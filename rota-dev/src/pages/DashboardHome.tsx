@@ -83,8 +83,18 @@ export default function DashboardHome() {
   const totalAllTasks = plan?.days.reduce((acc, d) => acc + d.tasks.length, 0) ?? 1;
   const progress = Math.round((totalDone / totalAllTasks) * 100);
 
+  const streak = (() => {
+    if (!plan) return 0;
+    let s = 0;
+    for (const day of plan.days) {
+      if (day.tasks.every(t => checkedTasks.includes(t))) s++;
+      else break;
+    }
+    return s;
+  })();
+
   const metrics = [
-    { label: "Streak", value: "7 dias 🔥", sub: "em sequência" },
+    { label: "Streak", value: streak > 0 ? `${streak} dias 🔥` : "0 dias", sub: "em sequência" },
     { label: "Progresso", value: plan ? `${progress}%` : "—", sub: "do plano concluído", progress: true, progressValue: progress },
     { label: "Dia atual", value: plan ? `${currentDayIndex + 1} de ${plan.days.length}` : "—", sub: "dias no plano" },
     { label: "Tarefas feitas", value: plan ? `${doneTasks}/${totalTasks}` : "—", sub: "hoje" },

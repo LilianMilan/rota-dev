@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth, useClerk } from "@clerk/clerk-react";
 import foxImg from "../assets/fox.png";
 
 const STEPS = [
@@ -18,6 +19,8 @@ const COMPARE = [
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
+  const { signOut } = useClerk();
 
   return (
     <div style={{ background: "#0a0a0a", minHeight: "100vh", color: "#fff" }}>
@@ -36,27 +39,50 @@ export default function LandingPage() {
           </span>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            onClick={() => navigate("/login")}
-            style={{ padding: "8px 18px", background: "transparent", border: "1px solid #2a2a2a", borderRadius: "10px", color: "#888", fontSize: "13px", cursor: "pointer" }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = "#444")}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = "#2a2a2a")}
-          >
-            Entrar
-          </button>
-          <button
-            onClick={() => navigate("/login")}
-            style={{ padding: "8px 18px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-          >
-            Começar grátis
-          </button>
+          {isSignedIn ? (
+            <>
+              <button
+                onClick={() => void signOut({ redirectUrl: "/" })}
+                style={{ padding: "8px 18px", background: "transparent", border: "1px solid #2a2a2a", borderRadius: "10px", color: "#888", fontSize: "13px", cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = "#444")}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = "#2a2a2a")}
+              >
+                Sair
+              </button>
+              <button
+                onClick={() => navigate("/dashboard")}
+                style={{ padding: "8px 18px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                Meu dashboard
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate("/login")}
+                style={{ padding: "8px 18px", background: "transparent", border: "1px solid #2a2a2a", borderRadius: "10px", color: "#888", fontSize: "13px", cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = "#444")}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = "#2a2a2a")}
+              >
+                Entrar
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                style={{ padding: "8px 18px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >
+                Começar grátis
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ paddingTop: "120px", paddingBottom: "80px", textAlign: "center", padding: "140px 2rem 80px" }}>
+      <section style={{ textAlign: "center", padding: "clamp(100px, 14vw, 140px) clamp(1rem, 5vw, 2rem) 80px" }}>
         <div style={{ display: "inline-block", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: "100px", padding: "6px 16px", marginBottom: "1.5rem" }}>
           <span style={{ fontSize: "12px", color: "#f97316", fontWeight: 500 }}>Planner com agente de IA para dev iniciante</span>
         </div>
@@ -89,7 +115,7 @@ export default function LandingPage() {
         <h2 style={{ fontSize: "28px", fontWeight: 700, textAlign: "center", marginBottom: "3rem" }}>
           Do zero ao plano em 2 minutos
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+        <div className="landing-steps-grid">
           {STEPS.map(s => (
             <div key={s.num} style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: "16px", padding: "1.75rem" }}>
               <p style={{ fontSize: "28px", fontWeight: 800, color: "rgba(249,115,22,0.2)", marginBottom: "1rem" }}>{s.num}</p>
@@ -107,7 +133,7 @@ export default function LandingPage() {
           Simples e sem surpresa
         </h2>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        <div className="landing-pricing-grid">
           {/* Free */}
           <div style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: "20px", padding: "2rem" }}>
             <p style={{ fontSize: "12px", color: "#555", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "8px" }}>Free</p>
