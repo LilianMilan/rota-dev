@@ -10,6 +10,9 @@ import { ProStatusProvider, useProStatus } from "./contexts/ProStatusContext";
 import RenewalPage from "./pages/RenewalPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
+
+const COMING_SOON = true;
 
 // Bloqueia dashboard se assinatura expirou
 function ProRoute({ children }: { children: React.ReactNode }) {
@@ -127,6 +130,17 @@ function AppLayout() {
 }
 
 function App() {
+  if (COMING_SOON) {
+    return (
+      <BrowserRouter>
+        <Routes>
+          <Route path="/sso-callback" element={<SSOCallback />} />
+          <Route path="*" element={<ComingSoonPage />} />
+        </Routes>
+      </BrowserRouter>
+    );
+  }
+
   return (
     <BrowserRouter>
       <ProStatusProvider>
