@@ -13,78 +13,100 @@ type PlanRow = {
 };
 
 function DayCard({
-  day, locked, checkedTasks, onToggle,
+  day, locked, checkedTasks, onToggle, isCurrentDay,
 }: {
-  day: PlanDay; locked: boolean; checkedTasks: string[]; onToggle: (task: string) => void;
+  day: PlanDay; locked: boolean; checkedTasks: string[]; onToggle: (task: string) => void; isCurrentDay: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const completedCount = day.tasks.filter(t => checkedTasks.includes(t)).length;
-  const allDone = completedCount === day.tasks.length;
+  const allDone = completedCount === day.tasks.length && day.tasks.length > 0;
+  const pct = day.tasks.length ? Math.round((completedCount / day.tasks.length) * 100) : 0;
+  const active = isCurrentDay && !locked;
 
   return (
-    <div style={{
-      background: locked ? "#0e0e0e" : "#111",
-      border: `1px solid ${allDone ? "rgba(249,115,22,0.3)" : locked ? "#161616" : "#1e1e1e"}`,
-      borderRadius: "14px", overflow: "hidden", opacity: locked ? 0.45 : 1,
-    }}>
+    <div
+      style={{
+        background: active ? "rgba(249,115,22,0.04)" : locked ? "rgba(255,255,255,0.01)" : "#161616",
+        border: `0.5px solid ${active ? "rgba(249,115,22,0.35)" : allDone ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.07)"}`,
+        borderRadius: "12px", overflow: "hidden",
+        opacity: locked ? 0.4 : 1,
+        transition: "border-color 0.2s",
+      }}
+      onMouseEnter={e => { if (!locked && !active) (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(249,115,22,0.2)"; }}
+      onMouseLeave={e => { if (!locked && !active) (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)"; }}
+    >
       <button
         onClick={() => !locked && setExpanded(v => !v)}
         style={{
-          width: "100%", display: "flex", alignItems: "center", gap: "12px",
-          padding: "1rem 1.25rem", background: "transparent", border: "none",
+          width: "100%", display: "flex", alignItems: "center", gap: "14px",
+          padding: "14px 16px", background: "transparent", border: "none",
           cursor: locked ? "not-allowed" : "pointer", textAlign: "left",
         }}
       >
+        {/* Número do dia */}
         <div style={{
-          width: "32px", height: "32px", borderRadius: "9px", flexShrink: 0,
-          background: "#1a1a1a", border: `1px solid ${allDone ? "#f97316" : "#2a2a2a"}`,
+          width: "32px", height: "32px", borderRadius: "8px", flexShrink: 0,
+          background: active ? "rgba(249,115,22,0.15)" : "#1f1f1f",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "12px", fontWeight: 700, color: allDone ? "#f97316" : "#444",
+          fontSize: "12px", fontWeight: 700,
+          color: active ? "#f97316" : allDone ? "#f97316" : "#444",
         }}>
           {allDone ? "✓" : day.day}
         </div>
+
+        {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: "14px", fontWeight: 600, color: locked ? "#333" : "#fff", marginBottom: "2px" }}>
-            Dia {day.day} — {day.title}
+          <p style={{ fontSize: "13px", fontWeight: 600, color: locked ? "#333" : "#fff", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {day.title}
           </p>
           <p style={{ fontSize: "11px", color: "#555" }}>{completedCount}/{day.tasks.length} tarefas concluídas</p>
         </div>
-        <div style={{ width: "60px", height: "4px", background: "#1e1e1e", borderRadius: "4px", flexShrink: 0 }}>
-          <div style={{ height: "4px", borderRadius: "4px", background: "#f97316", width: `${day.tasks.length ? (completedCount / day.tasks.length) * 100 : 0}%`, transition: "width 0.3s" }} />
+
+        {/* Barra de progresso + seta */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+          {!locked && (
+            <div style={{ width: "80px", height: "3px", background: "rgba(255,255,255,0.06)", borderRadius: "2px" }}>
+              <div style={{ height: "3px", width: `${pct}%`, background: "#f97316", borderRadius: "2px", transition: "width 0.3s" }} />
+            </div>
+          )}
+          {locked ? (
+            <span style={{ fontSize: "13px", color: "#2a2a2a" }}>🔒</span>
+          ) : (
+            <span style={{ fontSize: "14px", color: active ? "#f97316" : "#333", transition: "transform 0.2s", display: "inline-block", transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}>›</span>
+          )}
         </div>
-        {locked ? (
-          <span style={{ fontSize: "14px", color: "#333" }}>🔒</span>
-        ) : (
-          <span style={{ fontSize: "12px", color: "#444", display: "inline-block", transform: expanded ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>▾</span>
-        )}
       </button>
 
       {expanded && !locked && (
-        <div style={{ padding: "0 1.25rem 1.25rem" }}>
-          {day.description && <p style={{ fontSize: "13px", color: "#666", marginBottom: "1rem", lineHeight: 1.6 }}>{day.description}</p>}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div style={{ padding: "0 16px 16px" }}>
+          {day.description && (
+            <p style={{ fontSize: "12px", color: "#555", marginBottom: "12px", lineHeight: 1.6 }}>{day.description}</p>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
             {day.tasks.map((task) => {
               const checked = checkedTasks.includes(task);
               return (
                 <div key={task} onClick={() => onToggle(task)} style={{
                   display: "flex", alignItems: "center", gap: "10px",
-                  padding: "10px 12px", borderRadius: "10px",
-                  background: checked ? "rgba(249,115,22,0.04)" : "#161616",
-                  border: `1px solid ${checked ? "rgba(249,115,22,0.2)" : "#1e1e1e"}`,
-                  cursor: "pointer",
+                  padding: "9px 12px", borderRadius: "8px",
+                  background: checked ? "rgba(249,115,22,0.04)" : "#1e1e1e",
+                  border: `0.5px solid ${checked ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.05)"}`,
+                  cursor: "pointer", transition: "all 0.15s",
                 }}>
                   <div style={{
-                    width: "18px", height: "18px", borderRadius: "50%", flexShrink: 0,
-                    border: `2px solid ${checked ? "#f97316" : "#2a2a2a"}`,
+                    width: "16px", height: "16px", borderRadius: "4px", flexShrink: 0,
+                    border: checked ? "none" : "1.5px solid #374151",
                     background: checked ? "#f97316" : "transparent",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    {checked && <span style={{ color: "#fff", fontSize: "10px" }}>✓</span>}
+                    {checked && <span style={{ color: "#fff", fontSize: "9px", fontWeight: 700 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize: "13px", flex: 1, color: checked ? "#555" : "#ccc", textDecoration: checked ? "line-through" : "none" }}>
+                  <span style={{ fontSize: "12px", flex: 1, color: checked ? "#4b5563" : "#ccc", textDecoration: checked ? "line-through" : "none" }}>
                     {task}
                   </span>
-                  {checked && <span style={{ fontSize: "10px", fontWeight: 600, color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: "4px", padding: "2px 8px" }}>feito</span>}
+                  {checked && (
+                    <span style={{ fontSize: "10px", fontWeight: 600, color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: "4px", padding: "2px 7px" }}>feito</span>
+                  )}
                 </div>
               );
             })}
@@ -114,13 +136,19 @@ function ProBanner() {
   }
 
   return (
-    <div style={{ background: "linear-gradient(135deg, #111 0%, #1a0f00 100%)", border: "1px solid rgba(249,115,22,0.3)", borderRadius: "16px", padding: "2rem", textAlign: "center", marginTop: "1rem" }}>
-      <p style={{ fontSize: "20px", marginBottom: "8px" }}>🔒</p>
-      <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#fff", marginBottom: "8px" }}>Desbloqueie o plano completo</h3>
-      <p style={{ fontSize: "13px", color: "#888", marginBottom: "1.5rem", lineHeight: 1.6 }}>
-        No plano Pro você acessa todos os dias da trilha, agente IA, progresso salvo na nuvem e muito mais.
+    <div style={{ background: "#161616", border: "0.5px solid rgba(249,115,22,0.3)", borderRadius: "12px", padding: "1.75rem", textAlign: "center", marginTop: "8px" }}>
+      <p style={{ fontSize: "18px", marginBottom: "8px" }}>🔒</p>
+      <h3 style={{ fontSize: "15px", fontWeight: 700, color: "#fff", marginBottom: "6px" }}>Desbloqueie o plano completo</h3>
+      <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.25rem", lineHeight: 1.6 }}>
+        No Pro você acessa todos os dias, agente IA e progresso salvo na nuvem.
       </p>
-      <button onClick={handleSubscribe} disabled={loading} style={{ padding: "12px 28px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "14px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+      <button
+        onClick={handleSubscribe}
+        disabled={loading}
+        style={{ padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "9px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "background 0.2s" }}
+        onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#fb923c"; }}
+        onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; }}
+      >
         {loading ? "Aguarde..." : "Assinar Pro — R$12,90/mês"}
       </button>
     </div>
@@ -153,7 +181,6 @@ export default function MeuPlano() {
           }
         } catch { /* fallback */ }
       }
-      // Free ou fallback
       try {
         const raw = localStorage.getItem("rota-dev-plan");
         if (raw) {
@@ -170,7 +197,6 @@ export default function MeuPlano() {
     void load();
   }, [isPro, user?.id]);
 
-  // Atualiza checkedTasks ao trocar de plano
   useEffect(() => {
     if (!selectedRow) return;
     setCheckedTasks(Array.isArray(selectedRow.content.checkedTasks) ? selectedRow.content.checkedTasks : []);
@@ -195,42 +221,57 @@ export default function MeuPlano() {
   if (!plan) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh", gap: "12px" }}>
-        <span style={{ fontSize: "32px" }}>📋</span>
-        <h2 style={{ fontSize: "18px", fontWeight: 600, color: "#fff" }}>Nenhum plano gerado ainda</h2>
-        <p style={{ fontSize: "13px", color: "#666" }}>Responda o questionário para gerar sua trilha personalizada.</p>
-        <button onClick={() => window.location.href = "/app"} style={{ marginTop: "8px", padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
+        <span style={{ fontSize: "28px" }}>📋</span>
+        <h2 style={{ fontSize: "17px", fontWeight: 600, color: "#fff" }}>Nenhum plano gerado ainda</h2>
+        <p style={{ fontSize: "13px", color: "#555" }}>Responda o questionário para gerar sua trilha personalizada.</p>
+        <button
+          onClick={() => window.location.href = "/app"}
+          style={{ marginTop: "8px", padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "9px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}
+          onMouseEnter={e => (e.currentTarget.style.background = "#fb923c")}
+          onMouseLeave={e => (e.currentTarget.style.background = "#f97316")}
+        >
           Criar meu plano →
         </button>
       </div>
     );
   }
 
-  const visibleDays = isPro ? plan.days : plan.days.slice(0, FREE_DAY_LIMIT);
-  const lockedDays  = isPro ? [] : plan.days.slice(FREE_DAY_LIMIT);
-  const totalDone   = plan.days.reduce((acc, d) => acc + d.tasks.filter(t => checkedTasks.includes(t)).length, 0);
-  const totalTasks  = plan.days.reduce((acc, d) => acc + d.tasks.length, 0);
+  const totalDone = plan.days.reduce((acc, d) => acc + d.tasks.filter(t => checkedTasks.includes(t)).length, 0);
+  const totalTasks = plan.days.reduce((acc, d) => acc + d.tasks.length, 0);
   const globalProgress = totalTasks ? Math.round((totalDone / totalTasks) * 100) : 0;
 
+  // Dia atual = primeiro dia com tarefas incompletas
+  const currentDayIndex = plan.days.findIndex(d => d.tasks.some(t => !checkedTasks.includes(t)));
+  const activeDayNum = currentDayIndex >= 0 ? plan.days[currentDayIndex].day : plan.days[plan.days.length - 1]?.day;
+
+  const visibleDays = isPro ? plan.days : plan.days.slice(0, FREE_DAY_LIMIT);
+  const lockedDays = isPro ? [] : plan.days.slice(FREE_DAY_LIMIT);
+
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
+    <div style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      {/* Top row */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem", marginBottom: "1.75rem", flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: "22px", fontWeight: 600, color: "#fff", marginBottom: "4px" }}>Meu Plano</h1>
-          <p style={{ fontSize: "13px", color: "#666" }}>{plan.planTitle}</p>
+          <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", marginBottom: "4px" }}>Meu Plano</h1>
+          <p style={{ fontSize: "13px", color: "#555", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "320px" }}>{plan.planTitle}</p>
         </div>
         {isPro && (
-          <button onClick={() => window.location.href = "/app?regenerar=true"} style={{ padding: "8px 16px", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.3)", borderRadius: "10px", color: "#f97316", fontSize: "12px", cursor: "pointer" }}>
-            🔄 Novo plano
+          <button
+            onClick={() => window.location.href = "/app?regenerar=true"}
+            style={{ padding: "8px 14px", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "9px", color: "#f97316", fontSize: "12px", fontWeight: 600, cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(249,115,22,0.18)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(249,115,22,0.1)"; }}
+          >
+            ＋ Novo plano
           </button>
         )}
       </div>
 
-      {/* Cards de planos anteriores — só Pro com mais de 1 plano */}
+      {/* Chips de planos — só Pro com mais de 1 plano */}
       {isPro && allPlans.length > 1 && (
-        <div style={{ marginBottom: "1.5rem" }}>
-          <p style={{ fontSize: "11px", color: "#555", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>Seus planos</p>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div style={{ marginBottom: "28px" }}>
+          <p style={{ fontSize: "10px", color: "#444", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "10px", fontWeight: 600 }}>Seus planos</p>
+          <div style={{ display: "flex", gap: "10px", overflowX: "auto", paddingBottom: "4px" }}>
             {allPlans.map((row, i) => {
               const p = row.content.plan;
               const ct = Array.isArray(row.content.checkedTasks) ? row.content.checkedTasks : [];
@@ -241,22 +282,27 @@ export default function MeuPlano() {
               const date = new Date(row.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
               return (
-                <button key={row.id} onClick={() => setSelectedId(row.id)} style={{
-                  background: active ? "rgba(249,115,22,0.08)" : "#111",
-                  border: `1px solid ${active ? "rgba(249,115,22,0.4)" : "#1e1e1e"}`,
-                  borderRadius: "12px", padding: "12px 16px", cursor: "pointer",
-                  textAlign: "left", minWidth: "160px", maxWidth: "220px", transition: "all 0.15s",
-                }}>
-                  <p style={{ fontSize: "11px", color: active ? "#f97316" : "#555", marginBottom: "4px" }}>
+                <button
+                  key={row.id}
+                  onClick={() => setSelectedId(row.id)}
+                  style={{
+                    background: active ? "rgba(249,115,22,0.06)" : "#161616",
+                    border: `0.5px solid ${active ? "rgba(249,115,22,0.4)" : "rgba(255,255,255,0.07)"}`,
+                    borderRadius: "10px", padding: "12px 14px", cursor: "pointer",
+                    textAlign: "left", minWidth: "160px", flexShrink: 0,
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <p style={{ fontSize: "10px", color: active ? "#f97316" : "#555", marginBottom: "4px", fontWeight: 600 }}>
                     {i === 0 ? "Atual" : date}
                   </p>
-                  <p style={{ fontSize: "13px", fontWeight: 600, color: active ? "#fff" : "#888", marginBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 600, color: active ? "#fff" : "#888", marginBottom: "8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {p.planTitle}
                   </p>
-                  <div style={{ height: "3px", background: "#1e1e1e", borderRadius: "3px" }}>
-                    <div style={{ height: "3px", width: `${pct}%`, background: active ? "#f97316" : "#333", borderRadius: "3px" }} />
+                  <p style={{ fontSize: "10px", color: "#555", marginBottom: "6px" }}>{pct}% concluído</p>
+                  <div style={{ height: "2px", background: "rgba(255,255,255,0.06)", borderRadius: "1px" }}>
+                    <div style={{ height: "2px", width: `${pct}%`, background: active ? "#f97316" : "#333", borderRadius: "1px" }} />
                   </div>
-                  <p style={{ fontSize: "10px", color: "#555", marginTop: "4px" }}>{pct}% concluído</p>
                 </button>
               );
             })}
@@ -265,21 +311,39 @@ export default function MeuPlano() {
       )}
 
       {/* Progresso geral */}
-      <div style={{ background: "#111", border: "1px solid #1e1e1e", borderRadius: "14px", padding: "1.25rem 1.5rem", marginBottom: "1.5rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+      <div style={{ background: "#161616", border: "0.5px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "18px 22px", marginBottom: "16px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
           <span style={{ fontSize: "13px", color: "#888" }}>Progresso geral</span>
           <span style={{ fontSize: "13px", fontWeight: 700, color: "#f97316" }}>{globalProgress}%</span>
         </div>
-        <div style={{ height: "6px", background: "#1e1e1e", borderRadius: "6px" }}>
-          <div style={{ height: "6px", width: `${globalProgress}%`, background: "#f97316", borderRadius: "6px", transition: "width 0.3s" }} />
+        <div style={{ height: "5px", background: "rgba(255,255,255,0.06)", borderRadius: "3px" }}>
+          <div style={{ height: "5px", width: `${globalProgress}%`, background: "#f97316", borderRadius: "3px", transition: "width 0.4s ease" }} />
         </div>
-        <p style={{ fontSize: "11px", color: "#555", marginTop: "6px" }}>{totalDone} de {totalTasks} tarefas concluídas</p>
+        <p style={{ fontSize: "11px", color: "#444", marginTop: "8px" }}>{totalDone} de {totalTasks} tarefas concluídas</p>
       </div>
 
-      {/* Cards dos dias */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {visibleDays.map(day => <DayCard key={day.day} day={day} locked={false} checkedTasks={checkedTasks} onToggle={toggleTask} />)}
-        {lockedDays.map(day => <DayCard key={day.day} day={day} locked={true} checkedTasks={[]} onToggle={() => {}} />)}
+      {/* Lista de dias */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        {visibleDays.map(day => (
+          <DayCard
+            key={day.day}
+            day={day}
+            locked={false}
+            checkedTasks={checkedTasks}
+            onToggle={toggleTask}
+            isCurrentDay={day.day === activeDayNum}
+          />
+        ))}
+        {lockedDays.map(day => (
+          <DayCard
+            key={day.day}
+            day={day}
+            locked={true}
+            checkedTasks={[]}
+            onToggle={() => {}}
+            isCurrentDay={false}
+          />
+        ))}
       </div>
 
       {!isPro && <ProBanner />}
