@@ -54,7 +54,6 @@ export function useRotaDevOnboarding() {
     if (savedPlan) {
       try {
         parsedPlan = JSON.parse(savedPlan) as StudyPlan;
-        console.log("🔥 LOADED PLAN DO LOCALSTORAGE:", parsedPlan);
         setPlan(parsedPlan);
       } catch {
         localStorage.removeItem(PLAN_STORAGE_KEY);

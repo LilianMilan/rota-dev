@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import type { StudyPlan } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
 
+type PlanRow = { id: string; content: { plan: StudyPlan; checkedTasks: string[] }; created_at: string };
+
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
 
 export default function DashboardHome() {
@@ -11,6 +13,7 @@ export default function DashboardHome() {
   const { isPro } = useProStatus();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<StudyPlan | null>(null);
+  const [planId, setPlanId] = useState<string | null>(null);
   const [checkedTasks, setCheckedTasks] = useState<string[]>([]);
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
@@ -27,11 +30,12 @@ export default function DashboardHome() {
         try {
           const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
           if (res.ok) {
-            const data = await res.json() as { plan: StudyPlan; checkedTasks: string[] } | null;
-            if (data?.plan) {
-              // Sincroniza localStorage com Supabase
-              localStorage.setItem("rota-dev-plan", JSON.stringify(data.plan));
-              applyPlanAndProgress(data.plan, Array.isArray(data.checkedTasks) ? data.checkedTasks : []);
+            const rows = await res.json() as PlanRow[];
+            if (rows.length > 0) {
+              const { plan: p, checkedTasks: ct } = rows[0].content;
+              localStorage.setItem("rota-dev-plan", JSON.stringify(p));
+              setPlanId(rows[0].id);
+              applyPlanAndProgress(p, Array.isArray(ct) ? ct : []);
               return;
             }
           }
@@ -56,11 +60,11 @@ export default function DashboardHome() {
     setCheckedTasks(prev => {
       const next = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
       localStorage.setItem(PROGRESS_KEY(plan.planTitle), JSON.stringify(next));
-      if (isPro && user) {
+      if (isPro && user && planId) {
         void fetch("/api/save-progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ clerk_id: user.id, checkedTasks: next }),
+          body: JSON.stringify({ clerk_id: user.id, plan_id: planId, checkedTasks: next }),
         });
       }
       return next;
