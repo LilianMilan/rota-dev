@@ -39,6 +39,10 @@ html, body, #root {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .landing-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .landing-steps-grid {
     grid-template-columns: 1fr;
   }
