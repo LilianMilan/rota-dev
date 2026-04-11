@@ -95,9 +95,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
         <button
           onClick={() => signOut({ redirectUrl: "/" })}
           title="Sair"
-          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", fontSize: "14px", padding: "4px", flexShrink: 0 }}
+          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", fontSize: "18px", padding: "6px", flexShrink: 0, lineHeight: 1 }}
           onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#555")}
         >
           ⏻
         </button>
