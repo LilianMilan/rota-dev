@@ -4,7 +4,7 @@ import { useUser } from "@clerk/clerk-react";
 type Message = { role: "user" | "agent"; text: string };
 
 const INITIAL: Message[] = [
-  { role: "agent", text: "Oi! Sou o agente do Rota Dev 🔥 Pode me perguntar sobre seu plano, tecnologias ou o que tiver dúvida na trilha." },
+  { role: "agent", text: "Oi! Sou o agente do Rota Dev 🦊 Pode me perguntar sobre seu plano, tecnologias ou o que tiver dúvida na trilha." },
 ];
 
 const SUGGESTIONS = [
@@ -181,7 +181,7 @@ export default function AgenteIA() {
               fontWeight: 700,
               color: "#f97316",
             }}>
-              {msg.role === "agent" ? "🔥" : initials}
+              {msg.role === "agent" ? "🦊" : initials}
             </div>
 
             {/* Bubble */}
@@ -206,7 +206,7 @@ export default function AgenteIA() {
               width: "32px", height: "32px", borderRadius: "8px", flexShrink: 0,
               background: "rgba(249,115,22,0.15)",
               display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px",
-            }}>🔥</div>
+            }}>🦊</div>
             <div style={{
               padding: "12px 16px", borderRadius: "12px",
               background: "#161616", border: "1px solid rgba(255,255,255,0.07)",

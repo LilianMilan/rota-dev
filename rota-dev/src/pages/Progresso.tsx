@@ -101,7 +101,7 @@ export default function Progresso() {
   const STATS = [
     { label: "Dias concluídos", value: `${daysDone}/${totalDays}` },
     { label: "Tarefas feitas", value: `${doneTasks}` },
-    { label: "Streak atual", value: streak > 0 ? `${streak} 🔥` : "0" },
+    { label: "Streak atual", value: streak > 0 ? `${streak} 🦊` : "0" },
     { label: "Progresso geral", value: `${globalPct}%` },
   ];
 

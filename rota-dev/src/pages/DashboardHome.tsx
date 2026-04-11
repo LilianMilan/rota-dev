@@ -95,7 +95,7 @@ export default function DashboardHome() {
   const weekNum = Math.floor(currentDayIndex / 7) + 1;
 
   const metrics = [
-    { label: "Streak", value: streak > 0 ? `${streak} dias 🔥` : "0 dias", sub: "em sequência" },
+    { label: "Streak", value: streak > 0 ? `${streak} dias 🦊` : "0 dias", sub: "em sequência" },
     { label: "Progresso", value: plan ? `${progress}%` : "—", sub: "do plano concluído", showBar: true, barValue: progress },
     { label: "Dia atual", value: plan ? `${currentDayIndex + 1} de ${plan.days.length}` : "—", sub: "dias no plano" },
     { label: "Tarefas feitas", value: plan ? `${doneTasks}/${totalTasks}` : "—", sub: "hoje" },
