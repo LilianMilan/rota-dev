@@ -55,81 +55,81 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     return path === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(path);
   }
 
+  const initials = `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase();
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2rem", paddingLeft: "4px" }}>
-          <span style={{ fontSize: "20px" }}>🦊</span>
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
-            Rota<span style={{ color: "#f97316" }}>Dev</span>
-          </span>
+      {/* Logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: "9px", marginBottom: "2rem", paddingLeft: "2px" }}>
+        <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "rgba(249,115,22,0.15)", border: "1px solid rgba(249,115,22,0.3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
         </div>
-
-        <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.label}
-                onClick={() => { navigate(item.path); onClose?.(); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: "10px",
-                  padding: "10px 12px", borderRadius: "10px",
-                  background: active ? "rgba(249,115,22,0.1)" : "transparent",
-                  border: active ? "1px solid rgba(249,115,22,0.2)" : "1px solid transparent",
-                  color: active ? "#f97316" : "#555",
-                  fontSize: "13px", fontWeight: active ? 500 : 400,
-                  cursor: "pointer", textAlign: "left", width: "100%",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.color = "#888"; }}
-                onMouseLeave={e => { if (!active) e.currentTarget.style.color = "#555"; }}
-              >
-                <span style={{ fontSize: "15px" }}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
+        <span style={{ fontSize: "15px", fontWeight: 700, color: "#fff" }}>
+          Rota<span style={{ color: "#f97316" }}>Dev</span>
+        </span>
       </div>
 
+      {/* Nav */}
+      <nav style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+        {NAV_ITEMS.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.label}
+              onClick={() => { navigate(item.path); onClose?.(); }}
+              style={{
+                display: "flex", alignItems: "center", gap: "9px",
+                padding: "9px 10px", borderRadius: "9px",
+                background: active ? "rgba(249,115,22,0.12)" : "transparent",
+                border: "none",
+                color: active ? "#fb923c" : "#555",
+                fontSize: "13px", fontWeight: active ? 600 : 400,
+                cursor: "pointer", textAlign: "left", width: "100%",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={e => { if (!active) { e.currentTarget.style.color = "#888"; e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
+              onMouseLeave={e => { if (!active) { e.currentTarget.style.color = "#555"; e.currentTarget.style.background = "transparent"; } }}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Footer user */}
       <div style={{ marginTop: "auto" }}>
-      <div style={{
-        display: "flex", alignItems: "center", gap: "10px",
-        padding: "12px", borderRadius: "12px",
-        background: "#161616", border: "1px solid #1e1e1e",
-      }}>
-        {user?.imageUrl ? (
-          <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover" }} />
-        ) : (
-          <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#2a2a2a", display: "flex", alignItems: "center", justifyContent: "center", color: "#555", fontSize: "14px" }}>
-            {user?.firstName?.[0]}
-          </div>
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: "12px", color: "#ccc", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {user?.firstName} {user?.lastName}
-          </p>
-          {isPro && (
-            <span style={{
-              fontSize: "10px", fontWeight: 600, color: "#f97316",
-              background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.3)",
-              borderRadius: "4px", padding: "1px 6px", letterSpacing: "0.05em",
-            }}>
-              PRO
-            </span>
+        <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "12px" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+          {user?.imageUrl ? (
+            <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+          ) : (
+            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <span style={{ fontSize: "11px", fontWeight: 700, color: "#f97316" }}>{initials}</span>
+            </div>
           )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: "12px", color: "#ccc", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {user?.firstName} {user?.lastName}
+            </p>
+            {isPro && (
+              <span style={{ fontSize: "9px", fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "100px", padding: "1px 7px", letterSpacing: "0.06em" }}>
+                PRO
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => signOut({ redirectUrl: "/" })}
+            title="Sair"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", fontSize: "16px", padding: "4px", flexShrink: 0, lineHeight: 1 }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+          >
+            ⏻
+          </button>
         </div>
-        <button
-          onClick={() => signOut({ redirectUrl: "/" })}
-          title="Sair"
-          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", fontSize: "18px", padding: "6px", flexShrink: 0, lineHeight: 1 }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#555")}
-        >
-          ⏻
-        </button>
-      </div>
       </div>
     </div>
   );

@@ -115,11 +115,11 @@ export default function DashboardHome() {
       <div className="metrics-grid" style={{ marginBottom: "1.5rem" }}>
         {metrics.map((m) => (
           <div key={m.label} style={{
-            background: "#161616", border: "1px solid rgba(255,255,255,0.07)",
-            borderRadius: "14px", padding: "1.25rem 1.5rem",
+            background: "#161616", border: "0.5px solid rgba(255,255,255,0.08)",
+            borderRadius: "12px", padding: "1.25rem 1.5rem",
           }}>
             <p style={{ fontSize: "11px", color: "#555", marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{m.label}</p>
-            <p style={{ fontSize: "1.8rem", fontWeight: 700, color: "#fff", lineHeight: 1, marginBottom: "6px" }}>{m.value}</p>
+            <p style={{ fontSize: "1.8rem", fontWeight: 700, color: m.label === "Progresso" ? "#f97316" : "#fff", lineHeight: 1, marginBottom: "6px" }}>{m.value}</p>
             {m.showBar && (
               <div style={{ height: "3px", background: "rgba(255,255,255,0.06)", borderRadius: "2px", margin: "8px 0" }}>
                 <div style={{ height: "3px", width: `${m.barValue ?? 0}%`, background: "#f97316", borderRadius: "2px", transition: "width 0.4s ease" }} />
