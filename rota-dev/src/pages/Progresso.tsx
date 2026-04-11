@@ -32,8 +32,6 @@ function calcStats(plan: StudyPlan, checkedTasks: string[]) {
   return { totalTasks, doneTasks, daysDone, weeks, streak };
 }
 
-const DAY_LABELS = ["D", "S", "T", "Q", "Q", "S", "S"];
-
 export default function Progresso() {
   const { user } = useUser();
   const { isPro } = useProStatus();
