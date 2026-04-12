@@ -124,12 +124,12 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             disabled={portalLoading}
             style={{
               width: "100%", padding: "8px 10px", background: "transparent",
-              border: "none", borderRadius: "8px", color: "#3a3a3a",
-              fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer",
-              textAlign: "left", marginBottom: "8px", transition: "color 0.15s",
+              border: "1px solid rgba(255,255,255,0.07)", borderRadius: "8px", color: "#666",
+              fontSize: "12px", cursor: portalLoading ? "not-allowed" : "pointer",
+              textAlign: "left", marginBottom: "10px", transition: "all 0.15s",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#666")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#3a3a3a")}
+            onMouseEnter={e => { e.currentTarget.style.color = "#ccc"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#666"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
           >
             {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
           </button>
