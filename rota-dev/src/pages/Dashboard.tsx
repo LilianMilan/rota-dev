@@ -117,53 +117,51 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer user */}
-      <div style={{ marginTop: "auto", borderTop: "0.5px solid rgba(255,255,255,0.07)", padding: "10px 8px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {/* Avatar */}
-          {user?.imageUrl ? (
-            <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
-          ) : (
-            <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ fontSize: "11px", fontWeight: 700, color: "#f97316" }}>{initials}</span>
-            </div>
-          )}
-
-          {/* Coluna de texto */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0, flex: 1 }}>
-            <p style={{ fontSize: "12px", color: "#fff", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {user?.firstName} {user?.lastName}
-            </p>
-            {isPro && (
-              <span style={{ fontSize: "9px", fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "100px", padding: "1px 7px", letterSpacing: "0.06em", alignSelf: "flex-start" }}>
-                PRO
-              </span>
-            )}
-            {isPro && (
-              <button
-                onClick={handleManageSubscription}
-                disabled={portalLoading}
-                style={{ background: "transparent", border: "none", padding: 0, color: "#4b5563", fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer", textAlign: "left", transition: "color 0.15s" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#9ca3af")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
-              >
-                {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
-              </button>
-            )}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 8px", borderTop: "0.5px solid rgba(255,255,255,0.07)", marginTop: "8px" }}>
+        {/* Avatar */}
+        {user?.imageUrl ? (
+          <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "#f97316" }}>{initials}</span>
           </div>
+        )}
 
-          {/* Logout */}
-          <button
-            onClick={() => signOut({ redirectUrl: "/" })}
-            title="Sair"
-            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: "4px", flexShrink: 0, lineHeight: 1, marginLeft: "auto" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#444")}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
-            </svg>
-          </button>
+        {/* Coluna de texto */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: "12px", fontWeight: 600, color: "#e5e7eb", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {user?.firstName} {user?.lastName}
+          </span>
+          {isPro && (
+            <span style={{ fontSize: "9px", background: "rgba(249,115,22,0.2)", color: "#fb923c", border: "0.5px solid rgba(249,115,22,0.3)", padding: "1px 6px", borderRadius: "20px", width: "fit-content" }}>
+              PRO
+            </span>
+          )}
+          {isPro && (
+            <button
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+              style={{ background: "transparent", border: "none", padding: 0, fontSize: "11px", color: "#4b5563", cursor: portalLoading ? "not-allowed" : "pointer", textAlign: "left", textDecoration: "none", transition: "color 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#9ca3af")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
+            >
+              {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+            </button>
+          )}
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={() => signOut({ redirectUrl: "/" })}
+          title="Sair"
+          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#4b5563", padding: "4px", flexShrink: 0, lineHeight: 1, transition: "color 0.15s" }}
+          onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+          </svg>
+        </button>
       </div>
     </div>
   );
