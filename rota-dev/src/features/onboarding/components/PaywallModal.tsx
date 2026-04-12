@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 
 const BULLETS = [
-  "Plano completo de 90 dias",
+  "Plano completo personalizado",
   "Chat com agente de IA",
   "Progresso salvo na nuvem",
   "Regenere o plano quando quiser",
@@ -70,7 +70,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
 
         <div style={{ fontSize: "40px", margin: "1rem 0 0.5rem" }}>🦊</div>
         <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#fff", marginBottom: "10px", lineHeight: 1.3 }}>
-          Seu plano de 90 dias<br />tá te esperando!
+          Seu plano completo<br />tá te esperando!
         </h2>
         <p style={{ fontSize: "13px", color: "#888", lineHeight: 1.6, marginBottom: "1.5rem" }}>
           Você gerou o início. Agora desbloqueie o plano completo com agente de IA, progresso salvo e recursos reais.
