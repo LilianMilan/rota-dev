@@ -12,7 +12,7 @@ const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
 const PLAN_COUNT_KEY = "rota-dev-plan-count";
 
 export function useRotaDevOnboarding() {
-  const { isPro, refetch: refetchProStatus } = useProStatus();
+  const { isPro, loading: proLoading, refetch: refetchProStatus } = useProStatus();
   const { user } = useUser();
 
   const form = useForm<FormValues>({
@@ -34,6 +34,15 @@ export function useRotaDevOnboarding() {
   const [hydrated, setHydrated] = useState(false);
   const [showGenerationPaywall, setShowGenerationPaywall] = useState(false);
   const [monthlyLimitReached, setMonthlyLimitReached] = useState(false);
+
+  // Mostra paywall automaticamente se free user já gerou um plano antes
+  useEffect(() => {
+    if (!hydrated || proLoading || isPro) return;
+    const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
+    if (count >= 1 && plan) {
+      setShowGenerationPaywall(true);
+    }
+  }, [hydrated, proLoading, isPro, plan]);
 
   // Verifica limite mensal Pro ao entrar na página
   useEffect(() => {

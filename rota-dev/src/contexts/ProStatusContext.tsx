@@ -48,13 +48,6 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json() as { is_pro: boolean; plan_count: number };
         updateIsPro(data.is_pro);
         setPlanCount(data.plan_count);
-
-        // Se não é Pro, limpa dados locais de planos anteriores
-        if (!data.is_pro) {
-          Object.keys(localStorage)
-            .filter(k => k.startsWith("rota-dev-"))
-            .forEach(k => localStorage.removeItem(k));
-        }
       }
     } catch {
       // API não disponível localmente — mantém cache
