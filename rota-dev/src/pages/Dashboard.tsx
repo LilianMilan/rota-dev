@@ -118,7 +118,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* Footer user */}
       <div style={{ marginTop: "auto", borderTop: "0.5px solid rgba(255,255,255,0.07)", padding: "10px 8px 0" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           {/* Avatar */}
           {user?.imageUrl ? (
             <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
@@ -128,13 +128,13 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             </div>
           )}
 
-          {/* Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: "12px", color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "2px" }}>
+          {/* Coluna de texto */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0, flex: 1 }}>
+            <p style={{ fontSize: "12px", color: "#fff", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {user?.firstName} {user?.lastName}
             </p>
             {isPro && (
-              <span style={{ fontSize: "9px", fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "100px", padding: "1px 7px", letterSpacing: "0.06em" }}>
+              <span style={{ fontSize: "9px", fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.12)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "100px", padding: "1px 7px", letterSpacing: "0.06em", alignSelf: "flex-start" }}>
                 PRO
               </span>
             )}
@@ -142,7 +142,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               <button
                 onClick={handleManageSubscription}
                 disabled={portalLoading}
-                style={{ display: "block", marginTop: "4px", background: "transparent", border: "none", padding: 0, color: "#4b5563", fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer", textDecoration: "none", transition: "color 0.15s" }}
+                style={{ background: "transparent", border: "none", padding: 0, color: "#4b5563", fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer", textAlign: "left", transition: "color 0.15s" }}
                 onMouseEnter={e => (e.currentTarget.style.color = "#9ca3af")}
                 onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
               >
@@ -155,7 +155,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
           <button
             onClick={() => signOut({ redirectUrl: "/" })}
             title="Sair"
-            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: "4px", flexShrink: 0, lineHeight: 1 }}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: "4px", flexShrink: 0, lineHeight: 1, marginLeft: "auto" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
             onMouseLeave={e => (e.currentTarget.style.color = "#444")}
           >
