@@ -15,12 +15,12 @@ type PaywallModalProps = {
 
 export default function PaywallModal({ onContinueFree, blockFree = false }: PaywallModalProps) {
   const { user } = useUser();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"monthly" | "lifetime" | null>(null);
   const [error, setError] = useState("");
 
-  async function handleSubscribe() {
+  async function handleCheckout(plan: "monthly" | "lifetime") {
     setError("");
-    setLoading(true);
+    setLoading(plan);
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
@@ -28,6 +28,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
         body: JSON.stringify({
           clerk_id: user?.id,
           email: user?.primaryEmailAddress?.emailAddress,
+          plan,
         }),
       });
 
@@ -40,7 +41,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido.");
-      setLoading(false);
+      setLoading(null);
     }
   }
 
@@ -55,7 +56,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
       <div style={{
         background: "#111", border: "1px solid #2a2a2a",
         borderRadius: "20px", padding: "2rem",
-        maxWidth: "420px", width: "100%",
+        maxWidth: "440px", width: "100%",
         textAlign: "center",
       }}>
         {/* Badge */}
@@ -67,7 +68,6 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
           ROTA DEV PRO
         </span>
 
-        {/* Emoji + Título */}
         <div style={{ fontSize: "40px", margin: "1rem 0 0.5rem" }}>🦊</div>
         <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#fff", marginBottom: "10px", lineHeight: 1.3 }}>
           Seu plano de 90 dias<br />tá te esperando!
@@ -86,44 +86,69 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
           ))}
         </div>
 
-        {/* Card de preço */}
-        <div style={{
-          background: "#161616", border: "1px solid #2a2a2a",
-          borderRadius: "14px", padding: "1rem", marginBottom: "1rem",
-        }}>
-          <p style={{ fontSize: "28px", fontWeight: 800, color: "#fff", marginBottom: "2px" }}>
-            R$ 12,90<span style={{ fontSize: "14px", fontWeight: 400, color: "#555" }}>/mês</span>
-          </p>
-          <p style={{ fontSize: "11px", color: "#555" }}>cancele quando quiser</p>
+        {/* Opções de plano */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "12px" }}>
+          {/* Mensal */}
+          <button
+            onClick={() => handleCheckout("monthly")}
+            disabled={loading !== null}
+            style={{
+              width: "100%", padding: "13px 16px",
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "12px", color: "#ccc",
+              fontSize: "13px", fontWeight: 500,
+              cursor: loading !== null ? "not-allowed" : "pointer",
+              opacity: loading !== null ? 0.6 : 1,
+              transition: "all 0.15s",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; e.currentTarget.style.color = "#fff"; } }}
+            onMouseLeave={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#ccc"; } }}
+          >
+            <span>Mensal · cancele quando quiser</span>
+            <span style={{ fontWeight: 700, color: "#fff" }}>
+              {loading === "monthly" ? "..." : "R$ 12,90/mês"}
+            </span>
+          </button>
+
+          {/* Vitalício */}
+          <button
+            onClick={() => handleCheckout("lifetime")}
+            disabled={loading !== null}
+            style={{
+              width: "100%", padding: "13px 16px",
+              background: "#f97316",
+              border: "none",
+              borderRadius: "12px", color: "#fff",
+              fontSize: "13px", fontWeight: 700,
+              cursor: loading !== null ? "not-allowed" : "pointer",
+              opacity: loading !== null ? 0.7 : 1,
+              transition: "opacity 0.15s",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.88"; }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
+          >
+            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{
+                fontSize: "10px", fontWeight: 700, background: "rgba(0,0,0,0.2)",
+                borderRadius: "4px", padding: "2px 6px", letterSpacing: "0.05em",
+              }}>LANÇAMENTO</span>
+              Vitalício · pague uma vez
+            </span>
+            <span>{loading === "lifetime" ? "..." : "R$ 47,90"}</span>
+          </button>
         </div>
 
-        {/* Erro de checkout */}
         {error && (
           <p style={{ fontSize: "12px", color: "#ef4444", marginBottom: "10px" }}>{error}</p>
         )}
 
-        {/* Botão assinar */}
-        <button
-          onClick={handleSubscribe}
-          disabled={loading}
-          style={{
-            width: "100%", padding: "13px", background: "#f97316",
-            border: "none", borderRadius: "12px", color: "#fff",
-            fontSize: "14px", fontWeight: 700,
-            cursor: loading ? "not-allowed" : "pointer",
-            marginBottom: "12px", transition: "opacity 0.15s",
-            opacity: loading ? 0.7 : 1,
-          }}
-          onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.88"; }}
-          onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
-        >
-          {loading ? "Redirecionando..." : "Assinar agora →"}
-        </button>
-
         {/* Link free */}
         <button
           onClick={blockFree ? undefined : onContinueFree}
-          disabled={blockFree}
+          disabled={blockFree || loading !== null}
           style={{
             background: "transparent", border: "none",
             color: blockFree ? "#2a2a2a" : "#444",

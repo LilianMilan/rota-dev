@@ -119,20 +119,20 @@ function DayCard({
 
 function ProBanner() {
   const { user } = useUser();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"monthly" | "lifetime" | null>(null);
 
-  async function handleSubscribe() {
+  async function handleCheckout(plan: "monthly" | "lifetime") {
     if (!user) return;
-    setLoading(true);
+    setLoading(plan);
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: user.id, email: user.primaryEmailAddress?.emailAddress }),
+        body: JSON.stringify({ clerk_id: user.id, email: user.primaryEmailAddress?.emailAddress, plan }),
       });
       const data = await res.json() as { url?: string };
       if (data.url) window.location.href = data.url;
-    } finally { setLoading(false); }
+    } finally { setLoading(null); }
   }
 
   return (
@@ -142,15 +142,26 @@ function ProBanner() {
       <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.25rem", lineHeight: 1.6 }}>
         No Pro você acessa todos os dias, agente IA e progresso salvo na nuvem.
       </p>
-      <button
-        onClick={handleSubscribe}
-        disabled={loading}
-        style={{ padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "9px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "background 0.2s" }}
-        onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#fb923c"; }}
-        onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; }}
-      >
-        {loading ? "Aguarde..." : "Assinar Pro — R$12,90/mês"}
-      </button>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <button
+          onClick={() => handleCheckout("lifetime")}
+          disabled={loading !== null}
+          style={{ padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "9px", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "background 0.2s" }}
+          onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#fb923c"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; }}
+        >
+          {loading === "lifetime" ? "Aguarde..." : "Vitalício — R$47,90 · Lançamento"}
+        </button>
+        <button
+          onClick={() => handleCheckout("monthly")}
+          disabled={loading !== null}
+          style={{ padding: "10px 24px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "9px", color: "#888", fontSize: "12px", cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "all 0.2s" }}
+          onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; e.currentTarget.style.color = "#ccc"; } }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#888"; }}
+        >
+          {loading === "monthly" ? "Aguarde..." : "Mensal — R$12,90/mês"}
+        </button>
+      </div>
     </div>
   );
 }
