@@ -292,11 +292,11 @@ export default function MeuPlano() {
           <div style={{ display: "flex", gap: "10px", overflowX: "auto", paddingBottom: "4px" }}>
             {allPlans.map((row, i) => {
               const p = row.content.plan;
-              const ct = Array.isArray(row.content.checkedTasks) ? row.content.checkedTasks : [];
+              const active = row.id === (selectedId ?? allPlans[0]?.id);
+              const ct = active ? checkedTasks : (Array.isArray(row.content.checkedTasks) ? row.content.checkedTasks : []);
               const done = p.days.reduce((acc, d) => acc + d.tasks.filter(t => ct.includes(t)).length, 0);
               const total = p.days.reduce((acc, d) => acc + d.tasks.length, 0);
               const pct = total ? Math.round((done / total) * 100) : 0;
-              const active = row.id === (selectedId ?? allPlans[0]?.id);
               const date = new Date(row.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
               return (
