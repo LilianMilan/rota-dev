@@ -353,7 +353,7 @@ export default function LandingPage() {
                 </div>
                 <p style={{ fontSize: "11px", color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Vitalício</p>
                 <p style={{ fontSize: "2.4rem", fontWeight: 800, lineHeight: 1, marginBottom: "4px" }}>R$ 47,90</p>
-                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único · acesso para sempre</p>
+                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único</p>
                 <button
                   onClick={() => navigate("/login")}
                   style={{ width: "100%", padding: "11px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", marginBottom: "1.5rem", transition: "background 0.2s" }}
