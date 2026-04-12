@@ -89,7 +89,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Nav */}
-      <nav style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+      <nav style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.path);
           return (
@@ -117,7 +117,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer user */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 8px", borderTop: "0.5px solid rgba(255,255,255,0.07)", marginTop: "8px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 8px", borderTop: "0.5px solid rgba(255,255,255,0.07)" }}>
         {/* Avatar */}
         {user?.imageUrl ? (
           <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
