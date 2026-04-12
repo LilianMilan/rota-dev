@@ -12,7 +12,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 
-const COMING_SOON = true;
+const COMING_SOON = false;
 
 // Bloqueia dashboard se assinatura expirou
 function ProRoute({ children }: { children: React.ReactNode }) {
