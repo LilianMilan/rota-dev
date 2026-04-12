@@ -48,6 +48,23 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { user } = useUser();
   const { signOut } = useClerk();
   const { isPro } = useProStatus();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  async function handleManageSubscription() {
+    if (!user) return;
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/create-portal-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clerk_id: user.id }),
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) window.location.href = data.url;
+    } finally {
+      setPortalLoading(false);
+    }
+  }
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -101,6 +118,22 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
       {/* Footer user */}
       <div style={{ marginTop: "auto" }}>
+        {isPro && (
+          <button
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            style={{
+              width: "100%", padding: "8px 10px", background: "transparent",
+              border: "none", borderRadius: "8px", color: "#3a3a3a",
+              fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer",
+              textAlign: "left", marginBottom: "8px", transition: "color 0.15s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#666")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#3a3a3a")}
+          >
+            {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+          </button>
+        )}
         <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "12px" }} />
         <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
           {user?.imageUrl ? (
