@@ -117,25 +117,9 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Footer user */}
-      <div style={{ marginTop: "auto" }}>
-        {isPro && (
-          <button
-            onClick={handleManageSubscription}
-            disabled={portalLoading}
-            style={{
-              width: "100%", padding: "8px 10px", background: "transparent",
-              border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "#999",
-              fontSize: "12px", cursor: portalLoading ? "not-allowed" : "pointer",
-              textAlign: "left", marginBottom: "10px", transition: "all 0.15s",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#ccc"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#666"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
-          >
-            {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
-          </button>
-        )}
-        <div style={{ height: "1px", background: "rgba(255,255,255,0.06)", marginBottom: "12px" }} />
+      <div style={{ marginTop: "auto", borderTop: "0.5px solid rgba(255,255,255,0.07)", padding: "10px 8px 0" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
+          {/* Avatar */}
           {user?.imageUrl ? (
             <img src={user.imageUrl} alt={user.firstName ?? ""} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
           ) : (
@@ -143,8 +127,10 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               <span style={{ fontSize: "11px", fontWeight: 700, color: "#f97316" }}>{initials}</span>
             </div>
           )}
+
+          {/* Info */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: "12px", color: "#ccc", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{ fontSize: "12px", color: "#fff", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "2px" }}>
               {user?.firstName} {user?.lastName}
             </p>
             {isPro && (
@@ -152,15 +138,30 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
                 PRO
               </span>
             )}
+            {isPro && (
+              <button
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+                style={{ display: "block", marginTop: "4px", background: "transparent", border: "none", padding: 0, color: "#4b5563", fontSize: "11px", cursor: portalLoading ? "not-allowed" : "pointer", textDecoration: "none", transition: "color 0.15s" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "#9ca3af")}
+                onMouseLeave={e => (e.currentTarget.style.color = "#4b5563")}
+              >
+                {portalLoading ? "Abrindo..." : "Gerenciar assinatura"}
+              </button>
+            )}
           </div>
+
+          {/* Logout */}
           <button
             onClick={() => signOut({ redirectUrl: "/" })}
             title="Sair"
-            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", fontSize: "16px", padding: "4px", flexShrink: 0, lineHeight: 1 }}
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#444", padding: "4px", flexShrink: 0, lineHeight: 1 }}
             onMouseEnter={e => (e.currentTarget.style.color = "#f97316")}
             onMouseLeave={e => (e.currentTarget.style.color = "#444")}
           >
-            ⏻
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+            </svg>
           </button>
         </div>
       </div>
