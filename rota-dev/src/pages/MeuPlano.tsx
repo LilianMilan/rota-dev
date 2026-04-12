@@ -26,8 +26,8 @@ function DayCard({
   return (
     <div
       style={{
-        background: active ? "rgba(249,115,22,0.04)" : locked ? "rgba(255,255,255,0.01)" : "#161616",
-        border: `0.5px solid ${active ? "rgba(249,115,22,0.35)" : allDone ? "rgba(249,115,22,0.2)" : "rgba(255,255,255,0.07)"}`,
+        background: active ? "rgba(249,115,22,0.04)" : allDone ? "rgba(249,115,22,0.03)" : locked ? "rgba(255,255,255,0.01)" : "#161616",
+        border: `0.5px solid ${active ? "rgba(249,115,22,0.35)" : allDone ? "rgba(249,115,22,0.3)" : "rgba(255,255,255,0.07)"}`,
         borderRadius: "12px", overflow: "hidden",
         opacity: locked ? 0.4 : 1,
         transition: "border-color 0.2s",
@@ -59,7 +59,14 @@ function DayCard({
           <p style={{ fontSize: "13px", fontWeight: 600, color: locked ? "#333" : "#fff", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {day.title}
           </p>
-          <p style={{ fontSize: "11px", color: "#555" }}>{completedCount}/{day.tasks.length} tarefas concluídas</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <p style={{ fontSize: "11px", color: "#555" }}>{completedCount}/{day.tasks.length} tarefas concluídas</p>
+            {allDone && (
+              <span style={{ fontSize: "10px", fontWeight: 700, color: "#f97316", background: "rgba(249,115,22,0.1)", border: "1px solid rgba(249,115,22,0.25)", borderRadius: "4px", padding: "1px 7px" }}>
+                Concluído
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Barra de progresso + seta */}
