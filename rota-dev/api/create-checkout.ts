@@ -39,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (plan === "lifetime") {
       session = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card", "pix"],
+        payment_method_types: ["card"],
         customer_email: email,
         line_items: [{ price: LIFETIME_PRICE_ID, quantity: 1 }],
         metadata: { clerk_id, plan_type: "lifetime" },
