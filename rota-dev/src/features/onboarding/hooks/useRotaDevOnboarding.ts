@@ -54,56 +54,60 @@ export function useRotaDevOnboarding() {
       .catch(() => {});
   }, [isPro, planType, user?.id]);
 
+  // Hidrata estado — Pro usa nuvem, free usa localStorage
   useEffect(() => {
-    const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
-    const savedSubmittedData = localStorage.getItem(SUBMITTED_DATA_STORAGE_KEY);
+    if (proLoading) return;
 
-    let parsedPlan: StudyPlan | null = null;
-    let parsedSubmittedData: FormValues | null = null;
+    if (isPro) {
+      // Pro: limpa qualquer resquício de localStorage
+      localStorage.removeItem(PLAN_STORAGE_KEY);
+      localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
+    } else {
+      // Free: carrega do localStorage
+      const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
+      const savedSubmittedData = localStorage.getItem(SUBMITTED_DATA_STORAGE_KEY);
 
-    if (savedPlan) {
-      try {
-        parsedPlan = JSON.parse(savedPlan) as StudyPlan;
-        setPlan(parsedPlan);
-      } catch {
-        localStorage.removeItem(PLAN_STORAGE_KEY);
+      if (savedPlan) {
+        try {
+          setPlan(JSON.parse(savedPlan) as StudyPlan);
+        } catch {
+          localStorage.removeItem(PLAN_STORAGE_KEY);
+        }
       }
-    }
 
-    if (savedSubmittedData) {
-      try {
-        parsedSubmittedData = JSON.parse(savedSubmittedData) as FormValues;
-        setSubmittedData(parsedSubmittedData);
-      } catch {
-        localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
+      if (savedSubmittedData) {
+        try {
+          setSubmittedData(JSON.parse(savedSubmittedData) as FormValues);
+        } catch {
+          localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
+        }
       }
     }
 
     setHydrated(true);
-  }, [form]);
+  }, [proLoading, isPro]);
 
+  // Persiste plano no localStorage apenas para free users
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isPro) return;
 
     if (plan) {
       localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(plan));
     } else {
       localStorage.removeItem(PLAN_STORAGE_KEY);
     }
-  }, [plan, hydrated]);
+  }, [plan, hydrated, isPro]);
 
+  // Persiste dados do formulário no localStorage apenas para free users
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || isPro) return;
 
     if (submittedData) {
-      localStorage.setItem(
-        SUBMITTED_DATA_STORAGE_KEY,
-        JSON.stringify(submittedData),
-      );
+      localStorage.setItem(SUBMITTED_DATA_STORAGE_KEY, JSON.stringify(submittedData));
     } else {
       localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
     }
-  }, [submittedData, hydrated]);
+  }, [submittedData, hydrated, isPro]);
 
   const currentField = ONBOARDING_FIELDS[step];
   const totalSteps = ONBOARDING_FIELDS.length;
