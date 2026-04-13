@@ -211,7 +211,7 @@ export default function DashboardHome() {
         <div style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "2rem", marginBottom: "1.5rem", textAlign: "center" }}>
           <p style={{ fontSize: "13px", color: "#555", marginBottom: "12px" }}>Você ainda não tem um plano gerado.</p>
           <button
-            onClick={() => navigate("/app")}
+            onClick={() => navigate("/app?regenerar=true")}
             style={{ padding: "10px 24px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}
             onMouseEnter={e => (e.currentTarget.style.background = "#fb923c")}
             onMouseLeave={e => (e.currentTarget.style.background = "#f97316")}
