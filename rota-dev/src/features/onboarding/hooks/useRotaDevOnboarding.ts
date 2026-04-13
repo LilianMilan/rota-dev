@@ -12,7 +12,7 @@ const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
 const PLAN_COUNT_KEY = "rota-dev-plan-count";
 
 export function useRotaDevOnboarding() {
-  const { isPro, loading: proLoading, refetch: refetchProStatus } = useProStatus();
+  const { isPro, planType, loading: proLoading, refetch: refetchProStatus } = useProStatus();
   const { user } = useUser();
 
   const form = useForm<FormValues>({
@@ -47,11 +47,12 @@ export function useRotaDevOnboarding() {
   // Verifica limite mensal Pro ao entrar na página
   useEffect(() => {
     if (!isPro || !user) return;
+    const monthlyLimit = planType === "lifetime" ? 8 : 4;
     void fetch(`/api/plan-count-month?clerk_id=${user.id}`)
       .then(r => r.json())
-      .then((d: { count: number }) => { if (d.count >= 4) setMonthlyLimitReached(true); })
+      .then((d: { count: number }) => { if (d.count >= monthlyLimit) setMonthlyLimitReached(true); })
       .catch(() => {});
-  }, [isPro, user?.id]);
+  }, [isPro, planType, user?.id]);
 
   useEffect(() => {
     const savedPlan = localStorage.getItem(PLAN_STORAGE_KEY);
@@ -134,12 +135,12 @@ export function useRotaDevOnboarding() {
       const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
       if (count >= 1) { setShowGenerationPaywall(true); return; }
     } else if (user) {
-      // Pro: máx 4 planos por mês
+      const monthlyLimit = planType === "lifetime" ? 8 : 4;
       const res = await fetch(`/api/plan-count-month?clerk_id=${user.id}`);
       if (res.ok) {
         const { count } = await res.json() as { count: number };
-        if (count >= 4) {
-          setApiError("Você já gerou 4 planos este mês. Limite renova no primeiro dia do próximo mês.");
+        if (count >= monthlyLimit) {
+          setApiError(`Você já gerou ${monthlyLimit} planos este mês. Limite renova no primeiro dia do próximo mês.`);
           return;
         }
       }
