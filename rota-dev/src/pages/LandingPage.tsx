@@ -10,12 +10,12 @@ const TASKS = [
 ];
 
 const COMPARE = [
-  { label: "Plano gerado", free: "7 dias", pro: "Completo" },
-  { label: "Regenerar plano", free: "1x", pro: "4x por mês" },
-  { label: "Progresso salvo", free: "Navegador", pro: "Nuvem" },
-  { label: "Chat com agente IA", free: false, pro: true },
-  { label: "Acesso de qualquer device", free: false, pro: true },
-  { label: "Histórico de planos", free: false, pro: true },
+  { label: "Plano gerado", free: "7 dias", pro: "Completo", lifetime: "Completo" },
+  { label: "Regenerar plano", free: "1x", pro: "4x por mês", lifetime: "8x por mês" },
+  { label: "Progresso salvo", free: "Navegador", pro: "Nuvem", lifetime: "Nuvem" },
+  { label: "Chat com agente IA", free: false, pro: true, lifetime: true },
+  { label: "Acesso de qualquer device", free: false, pro: true, lifetime: true },
+  { label: "Histórico de planos", free: false, pro: true, lifetime: true },
 ];
 
 const STATS = [
@@ -365,8 +365,8 @@ export default function LandingPage() {
                   {COMPARE.map(c => (
                     <div key={c.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: "13px", color: "#888" }}>{c.label}</span>
-                      <span style={{ fontSize: "12px", color: c.pro === true ? "#f97316" : "#ccc", fontWeight: c.pro === true ? 600 : 400 }}>
-                        {c.pro === true ? "✓" : c.pro}
+                      <span style={{ fontSize: "12px", color: c.lifetime === true ? "#f97316" : "#ccc", fontWeight: c.lifetime === true ? 600 : 400 }}>
+                        {c.lifetime === true ? "✓" : c.lifetime}
                       </span>
                     </div>
                   ))}
