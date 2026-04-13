@@ -34,7 +34,19 @@ html, body, #root {
   gap: 16px;
 }
 
+.landing-nav {
+  padding: 1rem 2rem;
+}
+
 @media (max-width: 768px) {
+  .landing-nav {
+    padding: 0.875rem 1rem;
+  }
+
+  .landing-nav-secondary {
+    display: none;
+  }
+}
   .stats-grid-4 {
     grid-template-columns: repeat(2, 1fr);
   }

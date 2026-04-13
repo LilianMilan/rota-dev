@@ -151,10 +151,10 @@ export default function LandingPage() {
     <div style={{ background: "#0c0c0c", minHeight: "100vh", color: "#fff", fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
       {/* Nav */}
-      <nav style={{
+      <nav className="landing-nav" style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "1rem 2rem", background: "rgba(12,12,12,0.9)",
+        background: "rgba(12,12,12,0.9)",
         backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.06)",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -183,13 +183,14 @@ export default function LandingPage() {
             <>
               <button
                 onClick={() => navigate("/login")}
+                className="landing-nav-secondary"
                 style={{ padding: "8px 18px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", color: "#888", fontSize: "13px", cursor: "pointer", transition: "all 0.2s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "#ccc"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#888"; }}
               >Entrar</button>
               <button
                 onClick={() => navigate("/login")}
-                style={{ padding: "8px 18px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}
+                style={{ padding: "8px 18px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 600, cursor: "pointer", transition: "background 0.2s", whiteSpace: "nowrap" }}
                 onMouseEnter={e => (e.currentTarget.style.background = "#fb923c")}
                 onMouseLeave={e => (e.currentTarget.style.background = "#f97316")}
               >Começar grátis</button>
@@ -258,7 +259,7 @@ export default function LandingPage() {
         <>
           {/* Stats bar */}
           <section style={{ padding: "32px 2rem", maxWidth: "1100px", margin: "0 auto" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+            <div className="stats-grid-4">
               {STATS.map(s => (
                 <div key={s.value} style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px", padding: "1.25rem", textAlign: "center" }}>
                   <p style={{ fontSize: "1.75rem", fontWeight: 800, color: "#f97316", marginBottom: "4px" }}>{s.value}</p>
