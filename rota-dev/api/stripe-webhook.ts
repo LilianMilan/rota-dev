@@ -36,11 +36,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
     const clerk_id = session.metadata?.clerk_id;
+    const plan_type = session.metadata?.plan_type ?? "monthly";
 
     if (clerk_id) {
       await supabaseAdmin
         .from("users")
-        .update({ is_pro: true })
+        .update({ is_pro: true, plan_type })
         .eq("clerk_id", clerk_id);
     }
   }

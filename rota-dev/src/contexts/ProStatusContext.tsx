@@ -5,6 +5,7 @@ const PRO_CACHE_KEY = "rota-dev-is-pro";
 
 type ProStatusContextType = {
   isPro: boolean;
+  planType: "monthly" | "lifetime" | null;
   planCount: number;
   loading: boolean;
   refetch: () => void;
@@ -12,6 +13,7 @@ type ProStatusContextType = {
 
 const ProStatusContext = createContext<ProStatusContextType>({
   isPro: false,
+  planType: null,
   planCount: 0,
   loading: true,
   refetch: () => {},
@@ -22,12 +24,22 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
 
   // Lê cache do localStorage como valor inicial para evitar flash
   const [isPro, setIsPro] = useState(() => localStorage.getItem(PRO_CACHE_KEY) === "true");
+  const [planType, setPlanType] = useState<"monthly" | "lifetime" | null>(() => {
+    const v = localStorage.getItem("rota-dev-plan-type");
+    return v === "monthly" || v === "lifetime" ? v : null;
+  });
   const [planCount, setPlanCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   function updateIsPro(value: boolean) {
     setIsPro(value);
     localStorage.setItem(PRO_CACHE_KEY, String(value));
+  }
+
+  function updatePlanType(value: "monthly" | "lifetime" | null) {
+    setPlanType(value);
+    if (value) localStorage.setItem("rota-dev-plan-type", value);
+    else localStorage.removeItem("rota-dev-plan-type");
   }
 
   async function syncAndFetch() {
@@ -45,8 +57,9 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
 
       const res = await fetch(`/api/user-status?clerk_id=${clerkId}`);
       if (res.ok) {
-        const data = await res.json() as { is_pro: boolean; plan_count: number };
+        const data = await res.json() as { is_pro: boolean; plan_count: number; plan_type: "monthly" | "lifetime" | null };
         updateIsPro(data.is_pro);
+        updatePlanType(data.plan_type);
         setPlanCount(data.plan_count);
       }
     } catch {
@@ -77,7 +90,7 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
   }, [isLoaded, user?.id]);
 
   return (
-    <ProStatusContext.Provider value={{ isPro, planCount, loading, refetch: syncAndFetch }}>
+    <ProStatusContext.Provider value={{ isPro, planType, planCount, loading, refetch: syncAndFetch }}>
       {children}
     </ProStatusContext.Provider>
   );

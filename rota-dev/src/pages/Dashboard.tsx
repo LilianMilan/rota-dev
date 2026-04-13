@@ -47,7 +47,7 @@ const NAV_ITEMS = [
 function SidebarContent({ onClose }: { onClose?: () => void }) {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { isPro } = useProStatus();
+  const { isPro, planType } = useProStatus();
   const [portalLoading, setPortalLoading] = useState(false);
 
   async function handleManageSubscription() {
@@ -137,7 +137,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
               PRO
             </span>
           )}
-          {isPro && (
+          {isPro && planType !== "lifetime" && (
             <button
               onClick={handleManageSubscription}
               disabled={portalLoading}

@@ -14,13 +14,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select("is_pro, plan_count")
+    .select("is_pro, plan_count, plan_type")
     .eq("clerk_id", clerk_id)
     .single();
 
   if (error) {
     // Usuário ainda não sincronizado — retorna defaults
-    return res.status(200).json({ is_pro: false, plan_count: 0 });
+    return res.status(200).json({ is_pro: false, plan_count: 0, plan_type: null });
   }
 
   return res.status(200).json(data);
