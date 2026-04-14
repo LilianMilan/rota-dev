@@ -33,6 +33,7 @@ export default function RotaDevOnboardingForm() {
     resetFormFlow,
     showGenerationPaywall,
     setShowGenerationPaywall,
+    paywallBlockFree,
     monthlyLimitReached,
   } = useRotaDevOnboarding();
 
@@ -67,7 +68,7 @@ export default function RotaDevOnboardingForm() {
     <main className="min-h-screen bg-[#0F0F0F] px-4 py-10 text-white">
       {showGenerationPaywall && (
         <PaywallModal
-          blockFree
+          blockFree={paywallBlockFree}
           onContinueFree={() => setShowGenerationPaywall(false)}
         />
       )}

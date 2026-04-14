@@ -33,13 +33,16 @@ export function useRotaDevOnboarding() {
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [showGenerationPaywall, setShowGenerationPaywall] = useState(false);
+  const [paywallBlockFree, setPaywallBlockFree] = useState(false);
   const [monthlyLimitReached, setMonthlyLimitReached] = useState(false);
 
   // Mostra paywall automaticamente se free user já gerou um plano antes
+  // blockFree=false: usuário pode fechar e ver o plano que já gerou
   useEffect(() => {
     if (!hydrated || proLoading || isPro) return;
     const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
     if (count >= 1 && plan) {
+      setPaywallBlockFree(false);
       setShowGenerationPaywall(true);
     }
   }, [hydrated, proLoading, isPro, plan]);
@@ -137,7 +140,7 @@ export function useRotaDevOnboarding() {
     // Verifica limite de planos
     if (!isPro) {
       const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
-      if (count >= 1) { setShowGenerationPaywall(true); return; }
+      if (count >= 1) { setPaywallBlockFree(true); setShowGenerationPaywall(true); return; }
     } else if (user) {
       const monthlyLimit = planType === "lifetime" ? 8 : 4;
       const res = await fetch(`/api/plan-count-month?clerk_id=${user.id}`);
@@ -214,6 +217,7 @@ export function useRotaDevOnboarding() {
     resetFormFlow,
     showGenerationPaywall,
     setShowGenerationPaywall,
+    paywallBlockFree,
     monthlyLimitReached,
   };
 }
