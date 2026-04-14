@@ -73,6 +73,16 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     if (!user) { setLoading(false); return; }
 
+    // Limpa cache se o usuário mudou (evita herdar status Pro de outra conta)
+    const cachedUserId = localStorage.getItem("rota-dev-user-id");
+    if (cachedUserId && cachedUserId !== user.id) {
+      localStorage.removeItem(PRO_CACHE_KEY);
+      localStorage.removeItem("rota-dev-plan-type");
+      setIsPro(false);
+      setPlanType(null);
+    }
+    localStorage.setItem("rota-dev-user-id", user.id);
+
     const justSubscribed = new URLSearchParams(window.location.search).get("subscribed") === "true";
 
     if (justSubscribed) {
