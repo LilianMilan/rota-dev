@@ -169,6 +169,26 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
 
 export default function Dashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { signOut } = useClerk();
+  const { isPro, planType } = useProStatus();
+  const { user } = useUser();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  async function handleManageSubscriptionMobile() {
+    if (!user) return;
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/create-portal-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clerk_id: user.id }),
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) window.location.href = data.url;
+    } finally {
+      setPortalLoading(false);
+    }
+  }
 
   return (
     <div className="dashboard-layout">
@@ -179,18 +199,38 @@ export default function Dashboard() {
       </aside>
 
       <header className="dashboard-mobile-header">
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span style={{ fontSize: "18px" }}>🦊</span>
-          <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>
-            Rota<span style={{ color: "#f97316" }}>Dev</span>
-          </span>
-        </div>
         <button
           onClick={() => setDrawerOpen(v => !v)}
           style={{ background: "transparent", border: "none", cursor: "pointer", color: "#888", fontSize: "20px", padding: "4px" }}
         >
           {drawerOpen ? "✕" : "☰"}
         </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "16px" }}>🦊</span>
+          <span style={{ fontSize: "14px", fontWeight: 700, color: "#fff" }}>
+            Rota<span style={{ color: "#f97316" }}>Dev</span>
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {isPro && planType !== "lifetime" && (
+            <button
+              onClick={handleManageSubscriptionMobile}
+              disabled={portalLoading}
+              style={{ background: "transparent", border: "1px solid rgba(249,115,22,0.3)", borderRadius: "6px", padding: "5px 10px", fontSize: "11px", color: "#fb923c", cursor: "pointer" }}
+            >
+              {portalLoading ? "..." : "Assinatura"}
+            </button>
+          )}
+          <button
+            onClick={() => signOut({ redirectUrl: "/" })}
+            title="Sair"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#555", padding: "4px", lineHeight: 1 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/>
+            </svg>
+          </button>
+        </div>
       </header>
 
       <main className="dashboard-main">
