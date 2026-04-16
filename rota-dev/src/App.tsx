@@ -14,7 +14,16 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 
 const COMING_SOON = false;
 
-// Bloqueia dashboard se assinatura expirou
+const TRIAL_DAYS = 7;
+
+function isTrialActive() {
+  const trialStart = localStorage.getItem("rota-dev-trial-start");
+  if (!trialStart) return false;
+  const elapsed = (Date.now() - parseInt(trialStart)) / (1000 * 60 * 60 * 24);
+  return elapsed < TRIAL_DAYS;
+}
+
+// Bloqueia dashboard se assinatura expirou e trial de 7 dias acabou
 function ProRoute({ children }: { children: React.ReactNode }) {
   const { isPro, loading } = useProStatus();
 
@@ -24,7 +33,7 @@ function ProRoute({ children }: { children: React.ReactNode }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-  if (!isPro) return <RenewalPage />;
+  if (!isPro && !isTrialActive()) return <RenewalPage />;
 
   return <>{children}</>;
 }

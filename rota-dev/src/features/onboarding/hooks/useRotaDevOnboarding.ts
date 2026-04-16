@@ -10,6 +10,8 @@ import { useProStatus } from "../../../contexts/ProStatusContext";
 const PLAN_STORAGE_KEY = "rota-dev-plan";
 const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
 const PLAN_COUNT_KEY = "rota-dev-plan-count";
+const TRIAL_START_KEY = "rota-dev-trial-start";
+const TRIAL_DAYS = 7;
 
 export function useRotaDevOnboarding() {
   const { isPro, planType, loading: proLoading, refetch: refetchProStatus } = useProStatus();
@@ -36,16 +38,6 @@ export function useRotaDevOnboarding() {
   const [paywallBlockFree, setPaywallBlockFree] = useState(false);
   const [monthlyLimitReached, setMonthlyLimitReached] = useState(false);
 
-  // Mostra paywall automaticamente se free user já gerou um plano antes
-  // blockFree=false: usuário pode fechar e ver o plano que já gerou
-  useEffect(() => {
-    if (!hydrated || proLoading || isPro) return;
-    const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
-    if (count >= 1 && plan) {
-      setPaywallBlockFree(false);
-      setShowGenerationPaywall(true);
-    }
-  }, [hydrated, proLoading, isPro, plan]);
 
   // Verifica limite mensal Pro ao entrar na página
   useEffect(() => {
@@ -170,9 +162,12 @@ export function useRotaDevOnboarding() {
           body: JSON.stringify({ clerk_id: user.id, plan: result, checkedTasks: [] }),
         });
       } else {
-        // Free: incrementa contador local
+        // Free: incrementa contador e salva início do trial
         const prev = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
         localStorage.setItem(PLAN_COUNT_KEY, String(prev + 1));
+        if (!localStorage.getItem(TRIAL_START_KEY)) {
+          localStorage.setItem(TRIAL_START_KEY, String(Date.now()));
+        }
       }
 
       refetchProStatus();
@@ -198,7 +193,7 @@ export function useRotaDevOnboarding() {
 
     localStorage.removeItem(PLAN_STORAGE_KEY);
     localStorage.removeItem(SUBMITTED_DATA_STORAGE_KEY);
-    // NÃO remove PLAN_COUNT_KEY — o limite persiste entre resets
+    // NÃO remove PLAN_COUNT_KEY nem TRIAL_START_KEY — persistem entre resets
   };
 
   return {
