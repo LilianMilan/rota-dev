@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSignIn, useAuth } from "@clerk/clerk-react";
+import { useSignIn, useSignUp, useAuth } from "@clerk/clerk-react";
 import foxImg from "../assets/fox.png";
 
 const features = [
@@ -66,6 +66,7 @@ function LeftPanel() {
 export default function LoginPage() {
   const navigate = useNavigate();
   const { signIn, setActive, isLoaded: signInLoaded } = useSignIn();
+  const { signUp, isLoaded: signUpLoaded } = useSignUp();
   const { isSignedIn, isLoaded } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -88,38 +89,58 @@ export default function LoginPage() {
     });
   }
 
+  const [authMode, setAuthMode] = useState<"signIn" | "signUp">("signIn");
+
   async function handleEmailSubmit() {
-    if (!signInLoaded || !email) return;
+    if (!signInLoaded || !signUpLoaded || !email) return;
     setLoading(true);
     setError("");
     try {
-      await signIn.create({ identifier: email });
-      await signIn.prepareFirstFactor({
+      await signIn!.create({ identifier: email });
+      await signIn!.prepareFirstFactor({
         strategy: "email_code",
-        emailAddressId: signIn.supportedFirstFactors?.find(
+        emailAddressId: signIn!.supportedFirstFactors?.find(
           (f) => f.strategy === "email_code"
         )?.emailAddressId ?? "",
       });
+      setAuthMode("signIn");
       setStep("verify");
-    } catch {
-      setError("Não foi possível enviar o código. Verifique o e-mail.");
+    } catch (err: unknown) {
+      const clerkErr = err as { errors?: { code: string }[] };
+      if (clerkErr?.errors?.[0]?.code === "form_identifier_not_found") {
+        try {
+          await signUp!.create({ emailAddress: email });
+          await signUp!.prepareEmailAddressVerification({ strategy: "email_code" });
+          setAuthMode("signUp");
+          setStep("verify");
+        } catch {
+          setError("Não foi possível enviar o código. Verifique o e-mail.");
+        }
+      } else {
+        setError("Não foi possível enviar o código. Verifique o e-mail.");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   async function handleVerifyCode() {
-    if (!signInLoaded || !code) return;
+    if (!signInLoaded || !signUpLoaded || !code) return;
     setLoading(true);
     setError("");
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "email_code",
-        code,
-      });
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        navigate("/app", { replace: true });
+      if (authMode === "signUp") {
+        const result = await signUp!.attemptEmailAddressVerification({ code });
+        if (result.status === "complete") {
+          await setActive!({ session: result.createdSessionId });
+          navigate("/app", { replace: true });
+        }
+      } else {
+        const result = await signIn!.attemptFirstFactor({ strategy: "email_code", code });
+        if (result.status === "complete") {
+          await setActive!({ session: result.createdSessionId });
+          navigate("/app", { replace: true });
+        }
       }
     } catch {
       setError("Código inválido. Tente novamente.");
