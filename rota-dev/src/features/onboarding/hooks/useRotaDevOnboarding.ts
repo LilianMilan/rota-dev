@@ -11,7 +11,6 @@ const PLAN_STORAGE_KEY = "rota-dev-plan";
 const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
 const PLAN_COUNT_KEY = "rota-dev-plan-count";
 const TRIAL_START_KEY = "rota-dev-trial-start";
-const TRIAL_DAYS = 7;
 
 export function useRotaDevOnboarding() {
   const { isPro, planType, loading: proLoading, refetch: refetchProStatus } = useProStatus();
