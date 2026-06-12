@@ -8,6 +8,8 @@ type ProStatusContextType = {
   planType: "monthly" | "lifetime" | null;
   planCount: number;
   loading: boolean;
+  /** Boleto gerado mas ainda não compensado — acesso libera quando o pagamento cair. */
+  paymentPending: boolean;
   refetch: () => void;
 };
 
@@ -16,6 +18,7 @@ const ProStatusContext = createContext<ProStatusContextType>({
   planType: null,
   planCount: 0,
   loading: true,
+  paymentPending: false,
   refetch: () => {},
 });
 
@@ -30,10 +33,17 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
   });
   const [planCount, setPlanCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [paymentPending, setPaymentPending] = useState(() => localStorage.getItem("rota-dev-payment-pending") === "true");
 
   function updateIsPro(value: boolean) {
     setIsPro(value);
     localStorage.setItem(PRO_CACHE_KEY, String(value));
+  }
+
+  function updatePaymentPending(value: boolean) {
+    setPaymentPending(value);
+    if (value) localStorage.setItem("rota-dev-payment-pending", "true");
+    else localStorage.removeItem("rota-dev-payment-pending");
   }
 
   function updatePlanType(value: "monthly" | "lifetime" | null) {
@@ -61,6 +71,8 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
         updateIsPro(data.is_pro);
         updatePlanType(data.plan_type);
         setPlanCount(data.plan_count);
+        // Pagamento compensou (boleto) → some o aviso de pendência.
+        if (data.is_pro) updatePaymentPending(false);
       }
     } catch {
       // API não disponível localmente — mantém cache
@@ -83,24 +95,42 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
     }
     localStorage.setItem("rota-dev-user-id", user.id);
 
-    const justSubscribed = new URLSearchParams(window.location.search).get("subscribed") === "true";
+    const params = new URLSearchParams(window.location.search);
+    const justSubscribed = params.get("subscribed") === "true";
 
     if (justSubscribed) {
-      // Marca Pro imediatamente (otimista) e confirma direto no Stripe
-      updateIsPro(true);
+      // Confirma a compra direto no Stripe pela session_id antes de liberar:
+      // cartão volta "paid" (libera na hora); boleto volta "pending" (gerado,
+      // mas só libera quando compensar). Depois sincroniza com o banco.
       const email = user.primaryEmailAddress?.emailAddress ?? "";
-      void fetch("/api/confirm-subscription", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: user.id, email }),
-      });
+      const sessionId = params.get("session_id") ?? undefined;
+      void (async () => {
+        try {
+          const res = await fetch("/api/confirm-subscription", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clerk_id: user.id, email, session_id: sessionId }),
+          });
+          const data = await res.json() as { is_pro: boolean; status?: string };
+          if (data.is_pro) {
+            updateIsPro(true);
+            updatePaymentPending(false);
+          } else if (data.status === "pending") {
+            updatePaymentPending(true);
+          }
+        } catch {
+          // API indisponível — segue para o sync, que lê o status do banco.
+        } finally {
+          void syncAndFetch();
+        }
+      })();
+    } else {
+      void syncAndFetch();
     }
-
-    void syncAndFetch();
   }, [isLoaded, user?.id]);
 
   return (
-    <ProStatusContext.Provider value={{ isPro, planType, planCount, loading, refetch: syncAndFetch }}>
+    <ProStatusContext.Provider value={{ isPro, planType, planCount, loading, paymentPending, refetch: syncAndFetch }}>
       {children}
     </ProStatusContext.Provider>
   );

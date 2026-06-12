@@ -15,12 +15,12 @@ type PaywallModalProps = {
 
 export default function PaywallModal({ onContinueFree, blockFree = false }: PaywallModalProps) {
   const { user } = useUser();
-  const [loading, setLoading] = useState<"monthly" | "lifetime" | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleCheckout(plan: "monthly" | "lifetime") {
+  async function handleCheckout() {
     setError("");
-    setLoading(plan);
+    setLoading(true);
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
@@ -28,7 +28,6 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
         body: JSON.stringify({
           clerk_id: user?.id,
           email: user?.primaryEmailAddress?.emailAddress,
-          plan,
         }),
       });
 
@@ -41,7 +40,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
       window.location.href = data.url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro desconhecido.");
-      setLoading(null);
+      setLoading(false);
     }
   }
 
@@ -86,44 +85,19 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
           ))}
         </div>
 
-        {/* Opções de plano */}
+        {/* Vitalício — pagamento único (cartão ou boleto) */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "12px" }}>
-          {/* Mensal */}
           <button
-            onClick={() => handleCheckout("monthly")}
-            disabled={loading !== null}
-            style={{
-              width: "100%", padding: "13px 16px",
-              background: "transparent",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: "12px", color: "#ccc",
-              fontSize: "13px", fontWeight: 500,
-              cursor: loading !== null ? "not-allowed" : "pointer",
-              opacity: loading !== null ? 0.6 : 1,
-              transition: "all 0.15s",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}
-            onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; e.currentTarget.style.color = "#fff"; } }}
-            onMouseLeave={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#ccc"; } }}
-          >
-            <span>Mensal · cancele quando quiser</span>
-            <span style={{ fontWeight: 700, color: "#fff" }}>
-              {loading === "monthly" ? "..." : "R$ 12,90/mês"}
-            </span>
-          </button>
-
-          {/* Vitalício */}
-          <button
-            onClick={() => handleCheckout("lifetime")}
-            disabled={loading !== null}
+            onClick={handleCheckout}
+            disabled={loading}
             style={{
               width: "100%", padding: "13px 16px",
               background: "#f97316",
               border: "none",
               borderRadius: "12px", color: "#fff",
               fontSize: "13px", fontWeight: 700,
-              cursor: loading !== null ? "not-allowed" : "pointer",
-              opacity: loading !== null ? 0.7 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1,
               transition: "opacity 0.15s",
               display: "flex", alignItems: "center", justifyContent: "space-between",
             }}
@@ -137,8 +111,11 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
               }}>LANÇAMENTO</span>
               Vitalício · pague uma vez
             </span>
-            <span>{loading === "lifetime" ? "..." : "R$ 47,90"}</span>
+            <span>{loading ? "..." : "R$ 47,90"}</span>
           </button>
+          <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>
+            Pague com cartão ou boleto · acesso para sempre
+          </p>
         </div>
 
         {error && (
@@ -148,7 +125,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
         {/* Link free */}
         <button
           onClick={blockFree ? undefined : onContinueFree}
-          disabled={blockFree || loading !== null}
+          disabled={blockFree || loading}
           style={{
             background: "transparent", border: "none",
             color: blockFree ? "#2a2a2a" : "#444",

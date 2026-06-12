@@ -324,29 +324,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Pro Mensal */}
-              <div style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "14px", padding: "2rem" }}>
-                <p style={{ fontSize: "11px", color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Pro</p>
-                <p style={{ fontSize: "2.4rem", fontWeight: 800, lineHeight: 1, marginBottom: "4px" }}>R$ 12,90</p>
-                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>por mês · cancele quando quiser</p>
-                <button
-                  onClick={() => navigate("/login")}
-                  style={{ width: "100%", padding: "11px", background: "transparent", border: "1px solid rgba(249,115,22,0.35)", borderRadius: "10px", color: "#f97316", fontSize: "13px", fontWeight: 600, cursor: "pointer", marginBottom: "1.5rem", transition: "all 0.2s" }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(249,115,22,0.08)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-                >Assinar mensal</button>
-                <div style={{ display: "flex", flexDirection: "column", gap: "11px" }}>
-                  {COMPARE.map(c => (
-                    <div key={c.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "13px", color: "#888" }}>{c.label}</span>
-                      <span style={{ fontSize: "12px", color: c.pro === true ? "#f97316" : "#ccc", fontWeight: c.pro === true ? 600 : 400 }}>
-                        {c.pro === true ? "✓" : c.pro}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Vitalício */}
               <div style={{ background: "#141414", border: "1px solid rgba(249,115,22,0.35)", borderRadius: "14px", padding: "2rem", position: "relative" }}>
                 <div style={{ position: "absolute", top: "16px", right: "16px", background: "#f97316", borderRadius: "100px", padding: "3px 10px", fontSize: "10px", fontWeight: 700, color: "#fff" }}>
@@ -354,7 +331,7 @@ export default function LandingPage() {
                 </div>
                 <p style={{ fontSize: "11px", color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Vitalício</p>
                 <p style={{ fontSize: "2.4rem", fontWeight: 800, lineHeight: 1, marginBottom: "4px" }}>R$ 47,90</p>
-                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único</p>
+                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único · cartão ou boleto</p>
                 <button
                   onClick={() => navigate("/login")}
                   style={{ width: "100%", padding: "11px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", marginBottom: "1.5rem", transition: "background 0.2s" }}

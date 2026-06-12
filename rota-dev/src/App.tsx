@@ -8,6 +8,7 @@ import RotaDevOnboardingForm from "./features/onboarding/components/RotaDevOnboa
 import foxImg from "./assets/fox.png";
 import { ProStatusProvider, useProStatus } from "./contexts/ProStatusContext";
 import RenewalPage from "./pages/RenewalPage";
+import PaymentPendingPage from "./pages/PaymentPendingPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -25,7 +26,7 @@ function isTrialActive() {
 
 // Bloqueia dashboard se assinatura expirou e trial de 7 dias acabou
 function ProRoute({ children }: { children: React.ReactNode }) {
-  const { isPro, loading } = useProStatus();
+  const { isPro, loading, paymentPending } = useProStatus();
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -33,7 +34,9 @@ function ProRoute({ children }: { children: React.ReactNode }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
-  if (!isPro && !isTrialActive()) return <RenewalPage />;
+  // Sem acesso e fora do trial: se há boleto aguardando compensação, mostra a
+  // tela de pendência; senão, o paywall de renovação.
+  if (!isPro && !isTrialActive()) return paymentPending ? <PaymentPendingPage /> : <RenewalPage />;
 
   return <>{children}</>;
 }

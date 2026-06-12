@@ -3,12 +3,12 @@ import { useUser } from "@clerk/clerk-react";
 
 export default function RenewalPage() {
   const { user } = useUser();
-  const [loading, setLoading] = useState<"monthly" | "lifetime" | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleRenew(plan: "monthly" | "lifetime") {
+  async function handleRenew() {
     if (!user) return;
-    setLoading(plan);
+    setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/create-checkout", {
@@ -17,7 +17,6 @@ export default function RenewalPage() {
         body: JSON.stringify({
           clerk_id: user.id,
           email: user.primaryEmailAddress?.emailAddress,
-          plan,
         }),
       });
       const data = await res.json() as { url?: string; error?: string };
@@ -25,11 +24,11 @@ export default function RenewalPage() {
         window.location.href = data.url;
       } else {
         setError(data.error ?? "Erro ao iniciar pagamento.");
+        setLoading(false);
       }
     } catch {
       setError("Erro de conexão. Tente novamente.");
-    } finally {
-      setLoading(null);
+      setLoading(false);
     }
   }
 
@@ -47,21 +46,21 @@ export default function RenewalPage() {
         <div style={{ fontSize: "40px", marginBottom: "1rem" }}>🔒</div>
 
         <h1 style={{ fontSize: "22px", fontWeight: 700, color: "#fff", marginBottom: "8px" }}>
-          Sua assinatura expirou
+          Seu período grátis acabou
         </h1>
         <p style={{ fontSize: "14px", color: "#666", marginBottom: "2rem", lineHeight: 1.6 }}>
-          Renove para continuar acessando seu dashboard, plano completo e agente IA.
+          Garanta o acesso vitalício para continuar com seu dashboard, plano completo e agente IA.
         </p>
 
         <div style={{
-          background: "#161616", border: "1px solid #2a2a2a",
+          background: "#161616", border: "1px solid rgba(249,115,22,0.3)",
           borderRadius: "14px", padding: "1.5rem", marginBottom: "1.5rem",
         }}>
-          <p style={{ fontSize: "13px", color: "#888", marginBottom: "4px" }}>Assinatura mensal</p>
+          <p style={{ fontSize: "13px", color: "#f97316", marginBottom: "4px" }}>Acesso vitalício · Lançamento</p>
           <p style={{ fontSize: "32px", fontWeight: 700, color: "#fff" }}>
-            R$ 12,90<span style={{ fontSize: "14px", color: "#666", fontWeight: 400 }}>/mês</span>
+            R$ 47,90<span style={{ fontSize: "14px", color: "#666", fontWeight: 400 }}> · uma vez</span>
           </p>
-          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cancele quando quiser</p>
+          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cartão ou boleto · acesso para sempre</p>
         </div>
 
         {error && (
@@ -70,34 +69,19 @@ export default function RenewalPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <button
-            onClick={() => handleRenew("lifetime")}
-            disabled={loading !== null}
+            onClick={handleRenew}
+            disabled={loading}
             style={{
               width: "100%", padding: "14px", background: "#f97316",
               border: "none", borderRadius: "12px", color: "#fff",
               fontSize: "15px", fontWeight: 700,
-              cursor: loading !== null ? "not-allowed" : "pointer",
-              opacity: loading !== null ? 0.7 : 1, transition: "opacity 0.15s",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.7 : 1, transition: "opacity 0.15s",
             }}
             onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.85"; }}
             onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
           >
-            {loading === "lifetime" ? "Aguarde..." : "Vitalício — R$ 47,90 · Lançamento →"}
-          </button>
-          <button
-            onClick={() => handleRenew("monthly")}
-            disabled={loading !== null}
-            style={{
-              width: "100%", padding: "12px", background: "transparent",
-              border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", color: "#888",
-              fontSize: "13px", fontWeight: 500,
-              cursor: loading !== null ? "not-allowed" : "pointer",
-              opacity: loading !== null ? 0.7 : 1, transition: "all 0.15s",
-            }}
-            onMouseEnter={e => { if (!loading) { e.currentTarget.style.borderColor = "rgba(249,115,22,0.3)"; e.currentTarget.style.color = "#ccc"; } }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#888"; }}
-          >
-            {loading === "monthly" ? "Aguarde..." : "Mensal — R$ 12,90/mês"}
+            {loading ? "Aguarde..." : "Garantir acesso vitalício →"}
           </button>
         </div>
       </div>

@@ -49,11 +49,11 @@ export default function TermsPage() {
             },
             {
               title: "4. Plano gratuito e Pro",
-              body: "O plano gratuito oferece geração de 1 plano com 7 dias de conteúdo, salvo localmente no navegador. O plano Pro oferece recursos adicionais descritos na página de preços, mediante assinatura mensal.",
+              body: "O plano gratuito oferece geração de 1 plano com 7 dias de conteúdo, salvo localmente no navegador, e dá acesso completo durante o período de teste de 7 dias. O plano Pro é um acesso vitalício, adquirido por pagamento único (cartão ou boleto), com os recursos descritos na página de preços.",
             },
             {
-              title: "5. Cancelamento",
-              body: "Você pode cancelar sua assinatura Pro a qualquer momento pelo painel de assinatura. O acesso Pro permanece ativo até o final do período pago.",
+              title: "5. Pagamento e reembolso",
+              body: "O acesso Pro é vitalício e pago uma única vez, sem renovação ou cobrança recorrente. Você pode solicitar reembolso em até 7 dias após a compra, conforme o direito de arrependimento previsto no Código de Defesa do Consumidor.",
             },
             {
               title: "6. Uso aceitável",
