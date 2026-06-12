@@ -11,7 +11,7 @@ const TASKS = [
 
 const COMPARE = [
   { label: "Plano gerado", free: "7 dias", pro: "Completo", lifetime: "Completo" },
-  { label: "Regenerar plano", free: "1x", pro: "4x por mês", lifetime: "8x por mês" },
+  { label: "Regenerar plano", free: false, pro: "4x por mês", lifetime: "8x por mês" },
   { label: "Progresso salvo", free: "Navegador", pro: "Nuvem", lifetime: "Nuvem" },
   { label: "Chat com agente IA", free: false, pro: true, lifetime: true },
   { label: "Acesso de qualquer device", free: false, pro: true, lifetime: true },

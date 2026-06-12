@@ -132,6 +132,12 @@ export function useRotaDevOnboarding() {
     if (!isPro) {
       const count = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
       if (count >= 1) { setPaywallBlockFree(true); setShowGenerationPaywall(true); return; }
+      // Conta o plano JÁ AQUI, atômico com a checagem. Antes o incremento ficava
+      // depois do await sob condição que podia ser pulada — deixava passar 2 planos.
+      localStorage.setItem(PLAN_COUNT_KEY, String(count + 1));
+      if (!localStorage.getItem(TRIAL_START_KEY)) {
+        localStorage.setItem(TRIAL_START_KEY, String(Date.now()));
+      }
     } else if (user) {
       const monthlyLimit = planType === "lifetime" ? 8 : 4;
       const res = await fetch(`/api/plan-count-month?clerk_id=${user.id}`);
@@ -160,17 +166,15 @@ export function useRotaDevOnboarding() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ clerk_id: user.id, plan: result, checkedTasks: [] }),
         });
-      } else {
-        // Free: incrementa contador e salva início do trial
-        const prev = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "0", 10);
-        localStorage.setItem(PLAN_COUNT_KEY, String(prev + 1));
-        if (!localStorage.getItem(TRIAL_START_KEY)) {
-          localStorage.setItem(TRIAL_START_KEY, String(Date.now()));
-        }
       }
 
       refetchProStatus();
     } catch {
+      // Geração falhou: devolve o contador do free pra não "queimar" o plano.
+      if (!isPro) {
+        const c = parseInt(localStorage.getItem(PLAN_COUNT_KEY) ?? "1", 10);
+        localStorage.setItem(PLAN_COUNT_KEY, String(Math.max(0, c - 1)));
+      }
       setApiError("Não consegui gerar sua rota agora. Tenta de novo 💛");
     } finally {
       setLoading(false);
