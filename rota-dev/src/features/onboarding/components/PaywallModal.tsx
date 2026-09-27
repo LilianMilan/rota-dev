@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../../lib/promo";
 
 const BULLETS = [
   "Plano completo personalizado",
@@ -17,6 +18,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const promo = isPromoActive();
 
   async function handleCheckout() {
     setError("");
@@ -108,13 +110,20 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
               <span style={{
                 fontSize: "10px", fontWeight: 700, background: "rgba(0,0,0,0.2)",
                 borderRadius: "4px", padding: "2px 6px", letterSpacing: "0.05em",
-              }}>LANÇAMENTO</span>
+              }}>{promo ? `PROMO ATÉ ${PROMO_END_LABEL}` : "LANÇAMENTO"}</span>
               Vitalício · pague uma vez
             </span>
-            <span>{loading ? "..." : "R$ 47,90"}</span>
+            <span>
+              {loading ? "..." : promo ? (
+                <>
+                  <span style={{ textDecoration: "line-through", opacity: 0.6, fontWeight: 400, marginRight: "6px" }}>{REGULAR_PRICE_LABEL}</span>
+                  {PROMO_PRICE_LABEL}
+                </>
+              ) : REGULAR_PRICE_LABEL}
+            </span>
           </button>
           <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>
-            Pague com cartão ou boleto · acesso para sempre
+            Cartão (crédito, débito ou virtual) ou boleto · acesso para sempre
           </p>
         </div>
 

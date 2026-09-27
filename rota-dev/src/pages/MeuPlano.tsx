@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import type { StudyPlan, PlanDay } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
+import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
 
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
 const FREE_DAY_LIMIT = 7;
@@ -157,9 +158,11 @@ function ProBanner() {
           onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#fb923c"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; }}
         >
-          {loading ? "Aguarde..." : "Vitalício — R$47,90 · Lançamento"}
+          {loading ? "Aguarde..." : isPromoActive()
+            ? `Vitalício — de ${REGULAR_PRICE_LABEL} por ${PROMO_PRICE_LABEL} · até ${PROMO_END_LABEL}`
+            : `Vitalício — ${REGULAR_PRICE_LABEL} · Lançamento`}
         </button>
-        <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>Cartão ou boleto · pague uma vez</p>
+        <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>Cartão (crédito, débito ou virtual) ou boleto · pague uma vez</p>
       </div>
     </div>
   );
