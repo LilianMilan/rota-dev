@@ -34,6 +34,10 @@ function ProRoute({ children }: { children: React.ReactNode }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
+  // Nunca começou o free (sem trial) → vai criar o plano grátis, não "acabou".
+  if (!isPro && !paymentPending && !localStorage.getItem("rota-dev-trial-start")) {
+    return <Navigate to="/app" replace />;
+  }
   // Sem acesso e fora do trial: se há boleto aguardando compensação, mostra a
   // tela de pendência; senão, o paywall de renovação.
   if (!isPro && !isTrialActive()) return paymentPending ? <PaymentPendingPage /> : <RenewalPage />;

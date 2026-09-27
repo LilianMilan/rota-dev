@@ -85,13 +85,24 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     if (!user) { setLoading(false); return; }
 
-    // Limpa cache se o usuário mudou (evita herdar status Pro de outra conta)
+    // Limpa cache se o usuário mudou (evita herdar status Pro de outra conta).
+    // O free também vive no navegador (plano, contador, início do trial,
+    // progresso) — sem limpar, a conta nova herdava o plano e o trial (às vezes
+    // já vencido → "período grátis acabou" sem nunca ter usado).
     const cachedUserId = localStorage.getItem("rota-dev-user-id");
     if (cachedUserId && cachedUserId !== user.id) {
       localStorage.removeItem(PRO_CACHE_KEY);
       localStorage.removeItem("rota-dev-plan-type");
+      localStorage.removeItem("rota-dev-payment-pending");
+      for (const key of ["rota-dev-plan", "rota-dev-submitted-data", "rota-dev-plan-count", "rota-dev-trial-start"]) {
+        localStorage.removeItem(key);
+      }
+      Object.keys(localStorage)
+        .filter(k => k.startsWith("rota-dev-progress:"))
+        .forEach(k => localStorage.removeItem(k));
       setIsPro(false);
       setPlanType(null);
+      setPaymentPending(false);
     }
     localStorage.setItem("rota-dev-user-id", user.id);
 

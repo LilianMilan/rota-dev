@@ -236,15 +236,16 @@ export default function PromoPopup({ variant }: PromoPopupProps) {
         )}
 
         <button
-          onClick={close}
+          onClick={() => { close(); if (variant === "landing") navigate("/login"); }}
           style={{
             marginTop: "12px", background: "transparent", border: "none",
-            color: "#444", fontSize: "12px", cursor: "pointer", transition: "color 0.15s",
+            color: "#777", fontSize: "13px", cursor: "pointer", transition: "color 0.15s",
+            textDecoration: "underline", textUnderlineOffset: "3px",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#888")}
-          onMouseLeave={e => (e.currentTarget.style.color = "#444")}
+          onMouseEnter={e => (e.currentTarget.style.color = "#ccc")}
+          onMouseLeave={e => (e.currentTarget.style.color = "#777")}
         >
-          Agora não
+          {variant === "landing" ? "Prefiro começar grátis" : "Continuar no plano grátis"}
         </button>
       </div>
     </div>
