@@ -4,21 +4,23 @@ import { useUser } from "@clerk/clerk-react";
 import { useProStatus } from "../../contexts/ProStatusContext";
 import { isPromoActive, PROMO_END, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../lib/promo";
 
-// Aparece no máximo 1x por dia por navegador (fechou → só amanhã).
-// `?promo-preview` na URL força abrir, pra conferir o visual.
+// Aparece 1x por visita: fechou → não volta nessa aba (nem com F5);
+// numa nova visita/aba aparece de novo. `?promo-preview` força abrir.
 const DISMISS_KEY = "rota-dev-promo-dismissed";
 
-function dismissedToday(): boolean {
+function dismissedThisVisit(): boolean {
   try {
-    return localStorage.getItem(DISMISS_KEY) === new Date().toDateString();
+    return sessionStorage.getItem(DISMISS_KEY) === "1";
   } catch {
     return false;
   }
 }
 
 function rememberDismiss() {
+  // No preview não conta como "fechou" — senão quem testa o visual para de ver a promo real.
+  if (new URLSearchParams(window.location.search).has("promo-preview")) return;
   try {
-    localStorage.setItem(DISMISS_KEY, new Date().toDateString());
+    sessionStorage.setItem(DISMISS_KEY, "1");
   } catch {
     // storage bloqueado — só não lembra
   }
@@ -56,36 +58,40 @@ function Countdown({ target }: { target: Date }) {
 }
 
 type PromoPopupProps = {
-  /** landing: abre após 5s ou ao rolar a página e leva pro cadastro.
-   *  dashboard: abre logo pra quem não é Pro e vai direto pro checkout. */
+  /** landing: abre quando a pessoa rola a página inicial.
+   *  dashboard: abre logo ao entrar.
+   *  Nos dois, nunca pra quem já é Pro ou tem boleto pendente. */
   variant: "landing" | "dashboard";
 };
 
 export default function PromoPopup({ variant }: PromoPopupProps) {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const { isPro, loading: statusLoading, paymentPending } = useProStatus();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const preview = new URLSearchParams(window.location.search).has("promo-preview");
-  const eligible = isPromoActive() && (preview || !dismissedToday()) && (
-    variant === "landing" || (!statusLoading && !isPro && !paymentPending)
-  );
+  // Deslogado: sempre elegível (o cache de Pro no navegador pode ser de outra conta).
+  // Logado: só depois de confirmar o status, e só se não for Pro.
+  const audienceOk = preview || (isLoaded && (
+    !isSignedIn || (!statusLoading && !isPro && !paymentPending)
+  ));
+  const eligible = isPromoActive() && (preview || !dismissedThisVisit()) && audienceOk;
 
   useEffect(() => {
     if (!eligible) return;
-    const timer = setTimeout(() => setOpen(true), preview ? 300 : variant === "landing" ? 5000 : 1200);
+    if (preview || variant === "dashboard") {
+      const timer = setTimeout(() => setOpen(true), preview ? 300 : 1200);
+      return () => clearTimeout(timer);
+    }
     function onScroll() {
       const scrolled = window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight);
-      if (scrolled > 0.25) setOpen(true);
+      if (scrolled > 0.2) setOpen(true);
     }
-    if (variant === "landing") window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("scroll", onScroll);
-    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, [eligible, variant, preview]);
 
   useEffect(() => {
@@ -104,7 +110,7 @@ export default function PromoPopup({ variant }: PromoPopupProps) {
 
   async function handleCta() {
     rememberDismiss();
-    if (variant === "landing" || !user) {
+    if (!user) {
       navigate("/login");
       return;
     }
@@ -236,7 +242,11 @@ export default function PromoPopup({ variant }: PromoPopupProps) {
         )}
 
         <button
-          onClick={() => { close(); if (variant === "landing") navigate("/login"); }}
+          onClick={() => {
+            close();
+            // Na landing leva pro caminho do grátis; no dashboard a pessoa já está nele.
+            if (variant === "landing") navigate(user ? "/app" : "/login");
+          }}
           style={{
             marginTop: "12px", background: "transparent", border: "none",
             color: "#777", fontSize: "13px", cursor: "pointer", transition: "color 0.15s",

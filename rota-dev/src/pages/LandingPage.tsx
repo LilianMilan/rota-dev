@@ -396,8 +396,7 @@ export default function LandingPage() {
         </p>
       </footer>
 
-      {/* Logado pode já ser Pro — a promo pra esses aparece no dashboard (só se não for). */}
-      {!isSignedIn && <PromoPopup variant="landing" />}
+      <PromoPopup variant="landing" />
     </div>
   );
 }
