@@ -3,6 +3,7 @@ import { useAuth, useClerk } from "@clerk/clerk-react";
 import foxImg from "../assets/fox.png";
 import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
 import PromoPopup from "../features/promo/PromoPopup";
+import UserCountBadge from "../features/landing/UserCountBadge";
 
 const TASKS = [
   { text: "Estrutura básica de um documento HTML", tech: "HTML", techColor: "#ef4444", techBg: "rgba(239,68,68,0.1)", done: true },
@@ -207,6 +208,7 @@ export default function LandingPage() {
         <div style={{ display: "flex", alignItems: "center", gap: "3rem", flexWrap: "wrap", justifyContent: "center" }}>
           {/* Texto */}
           <div style={{ flex: "1 1 320px", maxWidth: "480px" }}>
+            <UserCountBadge />
             <div style={{ display: "inline-block", background: "rgba(249,115,22,0.08)", border: "1px solid rgba(249,115,22,0.2)", borderRadius: "100px", padding: "5px 14px", marginBottom: "1.5rem" }}>
               <span style={{ fontSize: "11px", color: "#f97316", fontWeight: 500, letterSpacing: "0.03em" }}>Planner com agente de IA para dev iniciante</span>
             </div>
