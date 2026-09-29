@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import PixButton from "../../pix/PixCheckout";
+import { PIX_ENABLED } from "../../../lib/pix";
 import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../../lib/promo";
 
 const BULLETS = [
@@ -122,8 +124,9 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
               ) : REGULAR_PRICE_LABEL}
             </span>
           </button>
+          <PixButton />
           <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>
-            Cartão (crédito, débito ou virtual) ou boleto · acesso para sempre
+            Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto · acesso para sempre
           </p>
         </div>
 

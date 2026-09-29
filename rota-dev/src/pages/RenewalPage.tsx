@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
+import PixButton from "../features/pix/PixCheckout";
+import { PIX_ENABLED } from "../lib/pix";
 
 export default function RenewalPage() {
   const { user } = useUser();
@@ -67,7 +69,7 @@ export default function RenewalPage() {
           <p style={{ fontSize: "32px", fontWeight: 700, color: "#fff" }}>
             {promo ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL}<span style={{ fontSize: "14px", color: "#666", fontWeight: 400 }}> · uma vez</span>
           </p>
-          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cartão (crédito, débito ou virtual) ou boleto · acesso para sempre</p>
+          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto · acesso para sempre</p>
         </div>
 
         {error && (
@@ -90,6 +92,8 @@ export default function RenewalPage() {
           >
             {loading ? "Aguarde..." : "Garantir acesso vitalício →"}
           </button>
+          <PixButton />
+
         </div>
       </div>
     </div>

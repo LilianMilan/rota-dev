@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useProStatus } from "../../contexts/ProStatusContext";
+import PixButton from "../pix/PixCheckout";
+import { PIX_ENABLED } from "../../lib/pix";
 import { isPromoActive, PROMO_END, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../lib/promo";
 
 // Aparece 1x por visita: fechou → não volta nessa aba (nem com F5);
@@ -233,8 +235,9 @@ export default function PromoPopup({ variant }: PromoPopupProps) {
         >
           {loading ? "Aguarde..." : `Quero por ${PROMO_PRICE_LABEL} →`}
         </button>
+        <PixButton style={{ marginBottom: "10px" }} />
         <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>
-          Cartão (crédito, débito ou virtual) ou boleto
+          Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto
         </p>
 
         {error && (
