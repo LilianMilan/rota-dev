@@ -103,25 +103,29 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
               cursor: loading ? "not-allowed" : "pointer",
               opacity: loading ? 0.7 : 1,
               transition: "opacity 0.15s",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px",
+              textAlign: "left",
             }}
             onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.88"; }}
             onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
           >
-            <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {/* Duas colunas empilhadas (selo + texto | preço riscado + preço) pra não quebrar linha */}
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "5px" }}>
               <span style={{
                 fontSize: "10px", fontWeight: 700, background: "rgba(0,0,0,0.2)",
-                borderRadius: "4px", padding: "2px 6px", letterSpacing: "0.05em",
+                borderRadius: "4px", padding: "2px 6px", letterSpacing: "0.05em", whiteSpace: "nowrap",
               }}>{promo ? `PROMO ATÉ ${PROMO_END_LABEL}` : "LANÇAMENTO"}</span>
-              Vitalício · pague uma vez
+              <span style={{ fontSize: "14px" }}>Vitalício · pague uma vez</span>
             </span>
-            <span>
-              {loading ? "..." : promo ? (
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", whiteSpace: "nowrap" }}>
+              {loading ? "..." : (
                 <>
-                  <span style={{ textDecoration: "line-through", opacity: 0.6, fontWeight: 400, marginRight: "6px" }}>{REGULAR_PRICE_LABEL}</span>
-                  {PROMO_PRICE_LABEL}
+                  {promo && (
+                    <span style={{ fontSize: "11px", textDecoration: "line-through", opacity: 0.7, fontWeight: 500 }}>{REGULAR_PRICE_LABEL}</span>
+                  )}
+                  <span style={{ fontSize: "18px", fontWeight: 800 }}>{promo ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL}</span>
                 </>
-              ) : REGULAR_PRICE_LABEL}
+              )}
             </span>
           </button>
           <PixButton />
