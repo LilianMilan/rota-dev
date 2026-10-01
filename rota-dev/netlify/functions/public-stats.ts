@@ -2,7 +2,7 @@ import type { Handler } from "@netlify/functions";
 import { supabaseAdmin } from "./_supabase.js";
 
 // Números públicos pra prova social na landing. Só devolve a contagem
-// (nunca dados de usuário) e o CDN guarda por 10 min pra não bater no banco
+// (nunca dados de usuário) e o CDN guarda por 2 min pra não bater no banco
 // a cada visita.
 export const handler: Handler = async () => {
   const { count, error } = await supabaseAdmin
@@ -17,7 +17,7 @@ export const handler: Handler = async () => {
     statusCode: 200,
     headers: {
       "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=600",
+      "Cache-Control": "public, max-age=120",
     },
     body: JSON.stringify({ users: count }),
   };

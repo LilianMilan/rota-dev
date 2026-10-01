@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 // Prova social da landing: "+N devs já montaram sua rota", com o número
-// subindo do 0 ao abrir. N vem do banco, arredondado pra baixo na dezena
-// (148 → 140) — sempre verdadeiro. Se a API falhar, o selo não aparece.
+// subindo do 0 ao abrir. N é a contagem exata do banco (sobe a cada cadastro).
+// Se a API falhar, o selo não aparece.
 const DURATION_MS = 1400;
 
 export default function UserCountBadge() {
@@ -14,7 +14,7 @@ export default function UserCountBadge() {
     fetch("/api/public-stats")
       .then(r => (r.ok ? r.json() : null))
       .then((d: { users?: number } | null) => {
-        if (!cancelled && d?.users && d.users >= 10) setTarget(Math.floor(d.users / 10) * 10);
+        if (!cancelled && d?.users && d.users >= 10) setTarget(d.users);
       })
       .catch(() => {});
     return () => { cancelled = true; };
