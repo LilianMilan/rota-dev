@@ -3,6 +3,7 @@ import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import type { StudyPlan } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
+import { apiFetch } from "../lib/api";
 
 type PlanRow = { id: string; content: { plan: StudyPlan; checkedTasks: string[] }; created_at: string };
 
@@ -28,7 +29,7 @@ export default function DashboardHome() {
     async function load() {
       if (isPro && user) {
         try {
-          const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
+          const res = await apiFetch("/api/get-plan");
           if (res.ok) {
             const rows = await res.json() as PlanRow[];
             if (rows.length > 0) {
@@ -60,10 +61,10 @@ export default function DashboardHome() {
       const next = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
       localStorage.setItem(PROGRESS_KEY(plan.planTitle), JSON.stringify(next));
       if (isPro && user && planId) {
-        void fetch("/api/save-progress", {
+        void apiFetch("/api/save-progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ clerk_id: user.id, plan_id: planId, checkedTasks: next }),
+          body: JSON.stringify({ plan_id: planId, checkedTasks: next }),
         });
       }
       return next;

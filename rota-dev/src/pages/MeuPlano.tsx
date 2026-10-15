@@ -5,6 +5,7 @@ import { useProStatus } from "../contexts/ProStatusContext";
 import { LIFETIME_PRICE_LABEL } from "../lib/pricing";
 import PixButton from "../features/pix/PixCheckout";
 import { PIX_ENABLED } from "../lib/pix";
+import { apiFetch } from "../lib/api";
 
 const PROGRESS_KEY = (title: string) => `rota-dev-progress:${title}`;
 const FREE_DAY_LIMIT = 7;
@@ -135,11 +136,7 @@ function ProBanner() {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: user.id, email: user.primaryEmailAddress?.emailAddress }),
-      });
+      const res = await apiFetch("/api/create-checkout", { method: "POST" });
       const data = await res.json() as { url?: string };
       if (data.url) window.location.href = data.url;
     } finally { setLoading(false); }
@@ -183,7 +180,7 @@ export default function MeuPlano() {
     async function load() {
       if (isPro && user) {
         try {
-          const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
+          const res = await apiFetch("/api/get-plan");
           if (res.ok) {
             const rows = await res.json() as PlanRow[];
             if (rows.length > 0) {
@@ -222,10 +219,10 @@ export default function MeuPlano() {
       const next = prev.includes(task) ? prev.filter(t => t !== task) : [...prev, task];
       localStorage.setItem(PROGRESS_KEY(plan.planTitle), JSON.stringify(next));
       if (isPro && user && selectedRow.id !== "local") {
-        void fetch("/api/save-progress", {
+        void apiFetch("/api/save-progress", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ clerk_id: user.id, plan_id: selectedRow.id, checkedTasks: next }),
+          body: JSON.stringify({ plan_id: selectedRow.id, checkedTasks: next }),
         });
       }
       return next;

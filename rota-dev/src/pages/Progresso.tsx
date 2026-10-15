@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import type { StudyPlan } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
+import { apiFetch } from "../lib/api";
 
 type PlanRow = {
   id: string;
@@ -43,7 +44,7 @@ export default function Progresso() {
     async function load() {
       if (isPro && user) {
         try {
-          const res = await fetch(`/api/get-plan?clerk_id=${user.id}`);
+          const res = await apiFetch("/api/get-plan");
           if (res.ok) {
             const rows = await res.json() as PlanRow[];
             if (rows.length > 0) {

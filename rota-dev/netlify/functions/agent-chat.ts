@@ -1,12 +1,17 @@
 import type { Handler } from "@netlify/functions";
 import OpenAI from "openai";
 import { supabaseAdmin } from "./_supabase.js";
+import { consumeQuota } from "./_quota.js";
+import { getClerkId, unauthorized } from "./_auth.js";
 
 type Message = { role: "user" | "assistant"; content: string };
 
 // Mensagens por dia (fuso de Brasília) para cada Pro — vitalício barato não
-// pode virar custo de API ilimitado. Contador em supabase/agent_usage.sql.
+// pode virar custo de API ilimitado.
 const DAILY_MESSAGE_LIMIT = 30;
+// Histórico mandado pra OpenAI por chamada: corta conversas gigantes.
+const MAX_HISTORY = 20;
+const MAX_CHARS = 4000;
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -17,14 +22,17 @@ const json = (statusCode: number, body: unknown) => ({
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const { clerk_id, messages } = JSON.parse(event.body || "{}") as {
-    clerk_id?: string;
-    messages?: Message[];
-  };
+  const clerk_id = await getClerkId(event);
+  if (!clerk_id) return unauthorized();
 
-  if (!clerk_id || !messages?.length) {
-    return json(400, { error: "clerk_id e messages são obrigatórios." });
-  }
+  const { messages: raw } = JSON.parse(event.body || "{}") as { messages?: Message[] };
+  // Só user/assistant (nada de "system" injetado pelo cliente), tamanho limitado.
+  const messages = (Array.isArray(raw) ? raw : [])
+    .filter(m => (m?.role === "user" || m?.role === "assistant") && typeof m.content === "string")
+    .slice(-MAX_HISTORY)
+    .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }));
+
+  if (!messages.length) return json(400, { error: "messages é obrigatório." });
 
   // Chat é recurso Pro: confere no banco, não confia no front.
   const { data: user } = await supabaseAdmin
@@ -37,14 +45,7 @@ export const handler: Handler = async (event) => {
     return json(403, { error: "O agente IA é exclusivo do plano Pro. Desbloqueie em Meu plano. 🦊" });
   }
 
-  const { data: allowed, error: usageError } = await supabaseAdmin.rpc("use_agent_message", {
-    p_clerk_id: clerk_id,
-    p_limit: DAILY_MESSAGE_LIMIT,
-  });
-  // Se o contador falhar (ex.: SQL ainda não rodado), deixa passar em vez de
-  // derrubar o chat de quem pagou — mas registra pra aparecer no log.
-  if (usageError) console.error("agent-chat: contador de uso falhou", usageError.message);
-  else if (!allowed) {
+  if (!(await consumeQuota(clerk_id, "agent_chat", DAILY_MESSAGE_LIMIT))) {
     return json(429, { error: `Você chegou ao limite de ${DAILY_MESSAGE_LIMIT} mensagens de hoje. Amanhã tem mais! 🦊` });
   }
 

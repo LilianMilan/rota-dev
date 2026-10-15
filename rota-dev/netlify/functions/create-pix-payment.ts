@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import { asaas, isValidCpfCnpj, type AsaasPayment } from "./_asaas.js";
 import { LIFETIME_PRICE_CENTS } from "../../src/lib/pricing.js";
+import { getClerkId, getVerifiedEmail, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -16,18 +17,21 @@ function todayBrt(): string {
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const { clerk_id, email, name, cpfCnpj } = JSON.parse(event.body || "{}") as {
-    clerk_id?: string;
-    email?: string;
+  const clerk_id = await getClerkId(event);
+  if (!clerk_id) return unauthorized();
+
+  const { name, cpfCnpj } = JSON.parse(event.body || "{}") as {
     name?: string;
     cpfCnpj?: string;
   };
 
-  if (!clerk_id || !email) return json(400, { error: "clerk_id e email são obrigatórios." });
   if (!name?.trim()) return json(400, { error: "Informe seu nome." });
   if (!cpfCnpj || !isValidCpfCnpj(cpfCnpj)) return json(400, { error: "CPF ou CNPJ inválido." });
 
   try {
+    const email = await getVerifiedEmail(clerk_id);
+    if (!email) return json(400, { error: "Confirme seu e-mail antes de assinar." });
+
     // Reaproveita o cliente do Asaas desse usuário (evita duplicar a cada tentativa).
     const found = await asaas<{ data: { id: string }[] }>(
       `/customers?externalReference=${encodeURIComponent(clerk_id)}&limit=1`,
