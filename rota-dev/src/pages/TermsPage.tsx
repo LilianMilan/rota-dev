@@ -49,7 +49,7 @@ export default function TermsPage() {
             },
             {
               title: "4. Plano gratuito e Pro",
-              body: "O plano gratuito oferece geração de 1 plano com 7 dias de conteúdo, salvo localmente no navegador, e dá acesso completo durante o período de teste de 7 dias. O plano Pro é um acesso vitalício, adquirido por pagamento único (cartão ou boleto), com os recursos descritos na página de preços.",
+              body: "O plano gratuito oferece geração de 1 plano com 7 dias de conteúdo, salvo localmente no navegador, e dá acesso completo durante o período de teste de 7 dias. O plano Pro é um acesso vitalício, adquirido por pagamento único (cartão ou Pix), com os recursos descritos na página de preços.",
             },
             {
               title: "5. Pagamento e reembolso",

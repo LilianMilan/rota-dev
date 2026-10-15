@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useUser } from "@clerk/clerk-react";
 import { useProStatus } from "../../contexts/ProStatusContext";
-import { isPromoActive, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../lib/promo";
+import { LIFETIME_PRICE_LABEL } from "../../lib/pricing";
 import { PIX_ENABLED } from "../../lib/pix";
 
 type PixCharge = { payment_id: string; value: number; payload: string; qr_image: string };
@@ -85,7 +85,7 @@ function PixModal({ onClose }: { onClose: () => void }) {
     } catch { /* navegador bloqueou — o código continua visível pra copiar na mão */ }
   }
 
-  const priceLabel = isPromoActive() ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL;
+  const priceLabel = LIFETIME_PRICE_LABEL;
   const input: React.CSSProperties = {
     width: "100%", padding: "12px 14px", background: "#161616",
     border: "1px solid #2a2a2a", borderRadius: "10px", color: "#fff", fontSize: "14px",

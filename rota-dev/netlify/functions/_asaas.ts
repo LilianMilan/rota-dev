@@ -1,4 +1,4 @@
-// Cliente mínimo da API do Asaas (usado só pro Pix — cartão e boleto seguem no Stripe).
+// Cliente mínimo da API do Asaas (usado só pro Pix — cartão segue no Stripe).
 // ASAAS_ENV=production usa a API real; qualquer outro valor usa o sandbox.
 const BASE_URL = process.env.ASAAS_ENV === "production"
   ? "https://api.asaas.com/v3"

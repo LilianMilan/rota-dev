@@ -1,8 +1,6 @@
 import type { Handler } from "@netlify/functions";
 import { asaas, isValidCpfCnpj, type AsaasPayment } from "./_asaas.js";
-import { isPromoActive, PROMO_PRICE_CENTS } from "../../src/lib/promo.js";
-
-const REGULAR_PRICE_CENTS = 4790;
+import { LIFETIME_PRICE_CENTS } from "../../src/lib/pricing.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -54,14 +52,12 @@ export const handler: Handler = async (event) => {
       customerId = created.id;
     }
 
-    // Valor decidido no servidor (promo ou cheio), igual ao checkout do Stripe.
-    const cents = isPromoActive() ? PROMO_PRICE_CENTS : REGULAR_PRICE_CENTS;
     const payment = await asaas<AsaasPayment>("/payments", {
       method: "POST",
       body: {
         customer: customerId,
         billingType: "PIX",
-        value: cents / 100,
+        value: LIFETIME_PRICE_CENTS / 100, // decidido no servidor, igual ao Stripe
         dueDate: todayBrt(),
         description: "Rota Dev Pro — acesso vitalício",
         externalReference: clerk_id,

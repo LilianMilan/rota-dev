@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth, useClerk } from "@clerk/clerk-react";
 import foxImg from "../assets/fox.png";
-import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
-import PromoPopup from "../features/promo/PromoPopup";
+import { LIFETIME_PRICE_LABEL } from "../lib/pricing";
+import { PIX_ENABLED } from "../lib/pix";
 import UserCountBadge from "../features/landing/UserCountBadge";
 
 const TASKS = [
@@ -147,7 +147,6 @@ function PlanCard() {
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const promo = isPromoActive();
   const { isSignedIn } = useAuth();
   const { signOut } = useClerk();
 
@@ -332,14 +331,11 @@ export default function LandingPage() {
               {/* Vitalício */}
               <div style={{ background: "#141414", border: "1px solid rgba(249,115,22,0.35)", borderRadius: "14px", padding: "2rem", position: "relative" }}>
                 <div style={{ position: "absolute", top: "16px", right: "16px", background: "#f97316", borderRadius: "100px", padding: "3px 10px", fontSize: "10px", fontWeight: 700, color: "#fff" }}>
-                  {promo ? `Promoção até ${PROMO_END_LABEL}` : "Lançamento"}
+                  Lançamento
                 </div>
                 <p style={{ fontSize: "11px", color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>Vitalício</p>
-                {promo && (
-                  <p style={{ fontSize: "14px", color: "#555", textDecoration: "line-through", marginBottom: "4px" }}>{REGULAR_PRICE_LABEL}</p>
-                )}
-                <p style={{ fontSize: "2.4rem", fontWeight: 800, lineHeight: 1, marginBottom: "4px" }}>{promo ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL}</p>
-                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único · cartão ou boleto</p>
+                <p style={{ fontSize: "2.4rem", fontWeight: 800, lineHeight: 1, marginBottom: "4px" }}>{LIFETIME_PRICE_LABEL}</p>
+                <p style={{ fontSize: "12px", color: "#555", marginBottom: "1.5rem" }}>pagamento único · cartão{PIX_ENABLED ? " ou Pix" : ""}</p>
                 <button
                   onClick={() => navigate("/login")}
                   style={{ width: "100%", padding: "11px", background: "#f97316", border: "none", borderRadius: "10px", color: "#fff", fontSize: "13px", fontWeight: 700, cursor: "pointer", marginBottom: "1.5rem", transition: "background 0.2s" }}
@@ -398,7 +394,6 @@ export default function LandingPage() {
         </p>
       </footer>
 
-      <PromoPopup variant="landing" />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
+import { LIFETIME_PRICE_LABEL } from "../lib/pricing";
 import PixButton from "../features/pix/PixCheckout";
 import { PIX_ENABLED } from "../lib/pix";
 
@@ -8,7 +8,6 @@ export default function RenewalPage() {
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const promo = isPromoActive();
 
   async function handleRenew() {
     if (!user) return;
@@ -61,15 +60,12 @@ export default function RenewalPage() {
           borderRadius: "14px", padding: "1.5rem", marginBottom: "1.5rem",
         }}>
           <p style={{ fontSize: "13px", color: "#f97316", marginBottom: "4px" }}>
-            Acesso vitalício · {promo ? `Promoção até ${PROMO_END_LABEL}` : "Lançamento"}
+            Acesso vitalício · Lançamento
           </p>
-          {promo && (
-            <p style={{ fontSize: "14px", color: "#555", textDecoration: "line-through" }}>{REGULAR_PRICE_LABEL}</p>
-          )}
           <p style={{ fontSize: "32px", fontWeight: 700, color: "#fff" }}>
-            {promo ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL}<span style={{ fontSize: "14px", color: "#666", fontWeight: 400 }}> · uma vez</span>
+            {LIFETIME_PRICE_LABEL}<span style={{ fontSize: "14px", color: "#666", fontWeight: 400 }}> · uma vez</span>
           </p>
-          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto · acesso para sempre</p>
+          <p style={{ fontSize: "12px", color: "#555", marginTop: "4px" }}>Cartão (crédito, débito ou virtual){PIX_ENABLED ? " ou Pix" : ""} · acesso para sempre</p>
         </div>
 
         {error && (

@@ -8,7 +8,6 @@ import DashboardHome from "./DashboardHome";
 import MeuPlano from "./MeuPlano";
 import AgenteIA from "./AgenteIA";
 import Progresso from "./Progresso";
-import PromoPopup from "../features/promo/PromoPopup";
 
 const NAV_ITEMS = [
   {
@@ -243,7 +242,6 @@ export default function Dashboard() {
         </Routes>
       </main>
 
-      <PromoPopup variant="dashboard" />
     </div>
   );
 }

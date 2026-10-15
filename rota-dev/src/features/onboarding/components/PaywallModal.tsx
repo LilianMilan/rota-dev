@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 import PixButton from "../../pix/PixCheckout";
 import { PIX_ENABLED } from "../../../lib/pix";
-import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../../../lib/promo";
+import { LIFETIME_PRICE_LABEL } from "../../../lib/pricing";
 
 const BULLETS = [
   "Plano completo personalizado",
@@ -20,7 +20,6 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const promo = isPromoActive();
 
   async function handleCheckout() {
     setError("");
@@ -89,7 +88,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
           ))}
         </div>
 
-        {/* Vitalício — pagamento único (cartão ou boleto) */}
+        {/* Vitalício — pagamento único (cartão ou Pix) */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "12px" }}>
           <button
             onClick={handleCheckout}
@@ -109,28 +108,21 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
             onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = "0.88"; }}
             onMouseLeave={e => { if (!loading) e.currentTarget.style.opacity = "1"; }}
           >
-            {/* Duas colunas empilhadas (selo + texto | preço riscado + preço) pra não quebrar linha */}
+            {/* Duas colunas (selo + texto | preço) pra não quebrar linha */}
             <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "5px" }}>
               <span style={{
                 fontSize: "10px", fontWeight: 700, background: "rgba(0,0,0,0.2)",
                 borderRadius: "4px", padding: "2px 6px", letterSpacing: "0.05em", whiteSpace: "nowrap",
-              }}>{promo ? `PROMO ATÉ ${PROMO_END_LABEL}` : "LANÇAMENTO"}</span>
+              }}>LANÇAMENTO</span>
               <span style={{ fontSize: "14px" }}>Vitalício · pague uma vez</span>
             </span>
             <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", whiteSpace: "nowrap" }}>
-              {loading ? "..." : (
-                <>
-                  {promo && (
-                    <span style={{ fontSize: "11px", textDecoration: "line-through", opacity: 0.7, fontWeight: 500 }}>{REGULAR_PRICE_LABEL}</span>
-                  )}
-                  <span style={{ fontSize: "18px", fontWeight: 800 }}>{promo ? PROMO_PRICE_LABEL : REGULAR_PRICE_LABEL}</span>
-                </>
-              )}
+              {loading ? "..." : <span style={{ fontSize: "18px", fontWeight: 800 }}>{LIFETIME_PRICE_LABEL}</span>}
             </span>
           </button>
           <PixButton />
           <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>
-            Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto · acesso para sempre
+            Cartão (crédito, débito ou virtual){PIX_ENABLED ? " ou Pix" : ""} · acesso para sempre
           </p>
         </div>
 

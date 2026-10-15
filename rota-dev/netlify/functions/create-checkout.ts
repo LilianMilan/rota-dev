@@ -1,7 +1,9 @@
 import type { Handler } from "@netlify/functions";
 import Stripe from "stripe";
-import { isPromoActive, PROMO_PRICE_CENTS } from "../../src/lib/promo.js";
+import { LIFETIME_PRICE_CENTS } from "../../src/lib/pricing.js";
 
+// Price do vitalício no Stripe — usado só pra achar o produto; o valor cobrado
+// vem de LIFETIME_PRICE_CENTS (assim o preço vive num lugar só).
 const LIFETIME_PRICE_ID = "price_1TLQ44B6G3QSloksE19rZJj9";
 
 const json = (statusCode: number, body: unknown) => ({
@@ -39,34 +41,19 @@ export const handler: Handler = async (event) => {
   const baseUrl = process.env.VITE_APP_URL ?? "https://rotadev.app.br";
 
   try {
-    // Promoção: cobra o valor promocional no mesmo produto do vitalício e
-    // encurta o vencimento do boleto pra não esticar a promoção além do prazo.
-    const promo = isPromoActive();
-    let lineItem: { price: string; quantity: number } | {
-      price_data: { currency: string; product: string; unit_amount: number };
-      quantity: number;
-    } = { price: LIFETIME_PRICE_ID, quantity: 1 };
-    if (promo) {
-      const price = await stripe.prices.retrieve(LIFETIME_PRICE_ID);
-      lineItem = {
-        price_data: {
-          currency: price.currency,
-          product: typeof price.product === "string" ? price.product : price.product.id,
-          unit_amount: PROMO_PRICE_CENTS,
-        },
-        quantity: 1,
-      };
-    }
+    const price = await stripe.prices.retrieve(LIFETIME_PRICE_ID);
+    const product = typeof price.product === "string" ? price.product : price.product.id;
 
-    // Plano único: vitalício (pagamento único) — aceita cartão e boleto.
-    // Cartão libera na hora; boleto compensa em 1-3 dias úteis e só então
-    // libera o acesso (tratado via webhook async_payment_succeeded).
+    // Plano único: vitalício (pagamento único) — só cartão, libera na hora.
+    // Boleto saiu: a taxa fixa comia ~35% de uma venda de R$ 9,90 (Pix cobre esse público).
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      payment_method_types: ["card", "boleto"],
-      payment_method_options: { boleto: { expires_after_days: promo ? 1 : 3 } },
+      payment_method_types: ["card"],
       customer_email: email,
-      line_items: [lineItem],
+      line_items: [{
+        price_data: { currency: price.currency, product, unit_amount: LIFETIME_PRICE_CENTS },
+        quantity: 1,
+      }],
       metadata: { clerk_id, plan_type: "lifetime" },
       success_url: `${baseUrl}/dashboard?subscribed=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/app`,

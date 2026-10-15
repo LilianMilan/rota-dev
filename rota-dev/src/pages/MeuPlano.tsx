@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 import type { StudyPlan, PlanDay } from "../features/onboarding/types/onboarding";
 import { useProStatus } from "../contexts/ProStatusContext";
-import { isPromoActive, PROMO_END_LABEL, PROMO_PRICE_LABEL, REGULAR_PRICE_LABEL } from "../lib/promo";
+import { LIFETIME_PRICE_LABEL } from "../lib/pricing";
 import PixButton from "../features/pix/PixCheckout";
 import { PIX_ENABLED } from "../lib/pix";
 
@@ -160,12 +160,10 @@ function ProBanner() {
           onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#fb923c"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; }}
         >
-          {loading ? "Aguarde..." : isPromoActive()
-            ? `Vitalício — de ${REGULAR_PRICE_LABEL} por ${PROMO_PRICE_LABEL} · até ${PROMO_END_LABEL}`
-            : `Vitalício — ${REGULAR_PRICE_LABEL} · Lançamento`}
+          {loading ? "Aguarde..." : `Vitalício — ${LIFETIME_PRICE_LABEL} · Lançamento`}
         </button>
         <PixButton />
-        <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>Cartão (crédito, débito ou virtual){PIX_ENABLED ? ", Pix" : ""} ou boleto · pague uma vez</p>
+        <p style={{ fontSize: "11px", color: "#555", margin: 0 }}>Cartão (crédito, débito ou virtual){PIX_ENABLED ? " ou Pix" : ""} · pague uma vez</p>
       </div>
     </div>
   );
