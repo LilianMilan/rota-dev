@@ -6,7 +6,6 @@ import type { FormValues, StudyPlan } from "../types/onboarding";
 import { ONBOARDING_FIELDS } from "../constants/onboarding-fields";
 import { generateStudyPlan } from "../services/generateStudyPlan";
 import { useProStatus } from "../../../contexts/ProStatusContext";
-import { apiFetch } from "../../../lib/api";
 
 const PLAN_STORAGE_KEY = "rota-dev-plan";
 const SUBMITTED_DATA_STORAGE_KEY = "rota-dev-submitted-data";
@@ -43,7 +42,7 @@ export function useRotaDevOnboarding() {
   useEffect(() => {
     if (!isPro || !user) return;
     const monthlyLimit = planType === "lifetime" ? 8 : 4;
-    void apiFetch("/api/plan-count-month")
+    void fetch(`/api/plan-count-month?clerk_id=${user.id}`)
       .then(r => r.json())
       .then((d: { count: number }) => { if (d.count >= monthlyLimit) setMonthlyLimitReached(true); })
       .catch(() => {});
@@ -141,7 +140,7 @@ export function useRotaDevOnboarding() {
       }
     } else if (user) {
       const monthlyLimit = planType === "lifetime" ? 8 : 4;
-      const res = await apiFetch("/api/plan-count-month");
+      const res = await fetch(`/api/plan-count-month?clerk_id=${user.id}`);
       if (res.ok) {
         const { count } = await res.json() as { count: number };
         if (count >= monthlyLimit) {
@@ -162,10 +161,10 @@ export function useRotaDevOnboarding() {
       setPlan(result);
 
       if (isPro && user) {
-        void apiFetch("/api/save-plan", {
+        void fetch("/api/save-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ plan: result, checkedTasks: [] }),
+          body: JSON.stringify({ clerk_id: user.id, plan: result, checkedTasks: [] }),
         });
       }
 

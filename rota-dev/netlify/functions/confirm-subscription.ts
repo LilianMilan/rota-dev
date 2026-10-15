@@ -1,7 +1,6 @@
 import type { Handler } from "@netlify/functions";
 import Stripe from "stripe";
 import { supabaseAdmin } from "./_supabase.js";
-import { getClerkId, getVerifiedEmail, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -12,10 +11,12 @@ const json = (statusCode: number, body: unknown) => ({
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const clerk_id = await getClerkId(event);
-  if (!clerk_id) return unauthorized();
-
-  const { session_id } = JSON.parse(event.body || "{}") as { session_id?: string };
+  const { clerk_id, email, session_id } = JSON.parse(event.body || "{}") as {
+    clerk_id?: string;
+    email?: string;
+    session_id?: string;
+  };
+  if (!clerk_id) return json(400, { error: "clerk_id é obrigatório." });
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-03-25.dahlia" as const });
 
@@ -43,8 +44,7 @@ export const handler: Handler = async (event) => {
       return json(200, { is_pro: paid, status: paid ? "paid" : pending ? "pending" : "unpaid" });
     }
 
-    // Fallback legado: assinatura mensal ativa pelo e-mail verificado no Clerk.
-    const email = await getVerifiedEmail(clerk_id);
+    // Fallback legado: assinatura mensal ativa por e-mail.
     if (!email) return json(200, { is_pro: false });
 
     const customers = await stripe.customers.list({ email, limit: 5 });

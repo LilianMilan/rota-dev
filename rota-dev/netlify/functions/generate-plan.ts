@@ -1,7 +1,5 @@
 import type { Handler } from "@netlify/functions";
 import OpenAI from "openai";
-import { consumeQuota } from "./_quota.js";
-import { getClerkId, unauthorized } from "./_auth.js";
 
 type FormValues = {
   goal: "frontend" | "backend" | "fullstack" | "not_sure";
@@ -11,10 +9,6 @@ type FormValues = {
   motivation: "first_job" | "career_change" | "earn_more" | "curiosity";
 };
 
-// Teto diário anti-abuso (custo de API); as regras do produto
-// (1 plano free, limite mensal do Pro) continuam no app.
-const DAILY_GENERATION_LIMIT = 10;
-
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
   headers: { "Content-Type": "application/json" },
@@ -23,12 +17,6 @@ const json = (statusCode: number, body: unknown) => ({
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
-
-  const clerk_id = await getClerkId(event);
-  if (!clerk_id) return unauthorized();
-  if (!(await consumeQuota(clerk_id, "generate_plan", DAILY_GENERATION_LIMIT))) {
-    return json(429, { error: "Você gerou muitos planos hoje. Tente de novo amanhã." });
-  }
 
   try {
     const { goal, level, hoursPerDay, daysPerWeek, motivation } = JSON.parse(event.body || "{}") as FormValues;

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { apiFetch } from "../lib/api";
 
 type Message = { role: "user" | "agent"; text: string };
 
@@ -118,10 +117,11 @@ export default function AgenteIA() {
     setLoading(true);
 
     try {
-      const res = await apiFetch("/api/agent-chat", {
+      const res = await fetch("/api/agent-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clerk_id: user.id,
           messages: updatedMessages
             .filter(m => m.role !== "agent" || updatedMessages.indexOf(m) > 0)
             .map(m => ({ role: m.role === "agent" ? "assistant" : "user", content: m.text })),

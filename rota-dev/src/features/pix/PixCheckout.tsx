@@ -4,7 +4,6 @@ import { useUser } from "@clerk/clerk-react";
 import { useProStatus } from "../../contexts/ProStatusContext";
 import { LIFETIME_PRICE_LABEL } from "../../lib/pricing";
 import { PIX_ENABLED } from "../../lib/pix";
-import { apiFetch } from "../../lib/api";
 
 type PixCharge = { payment_id: string; value: number; payload: string; qr_image: string };
 
@@ -39,7 +38,7 @@ function PixModal({ onClose }: { onClose: () => void }) {
     if (!charge || paid || !user) return;
     const id = setInterval(async () => {
       try {
-        const res = await apiFetch(`/api/pix-status?payment_id=${encodeURIComponent(charge.payment_id)}`);
+        const res = await fetch(`/api/pix-status?payment_id=${charge.payment_id}&clerk_id=${user.id}`);
         const data = await res.json() as { paid?: boolean };
         if (data.paid) {
           setPaid(true);
@@ -57,10 +56,12 @@ function PixModal({ onClose }: { onClose: () => void }) {
     setError("");
     setLoading(true);
     try {
-      const res = await apiFetch("/api/create-pix-payment", {
+      const res = await fetch("/api/create-pix-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clerk_id: user.id,
+          email: user.primaryEmailAddress?.emailAddress,
           name,
           cpfCnpj,
         }),

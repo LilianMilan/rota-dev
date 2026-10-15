@@ -1,6 +1,5 @@
 import type { Handler } from "@netlify/functions";
 import { supabaseAdmin } from "./_supabase.js";
-import { getClerkId, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -11,25 +10,21 @@ const json = (statusCode: number, body: unknown) => ({
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const clerk_id = await getClerkId(event);
-  if (!clerk_id) return unauthorized();
-
-  const { plan, checkedTasks = [] } = JSON.parse(event.body || "{}") as {
+  const { clerk_id, plan, checkedTasks = [] } = JSON.parse(event.body || "{}") as {
+    clerk_id?: string;
     plan?: unknown;
     checkedTasks?: string[];
   };
 
-  if (!plan) return json(400, { error: "plan é obrigatório." });
+  if (!clerk_id || !plan) return json(400, { error: "clerk_id e plan são obrigatórios." });
 
   const { data: user } = await supabaseAdmin
     .from("users")
-    .select("id, is_pro")
+    .select("id")
     .eq("clerk_id", clerk_id)
     .single();
 
   if (!user) return json(404, { error: "Usuário não encontrado." });
-  // Plano salvo na nuvem é recurso Pro (free fica só no navegador).
-  if (!user.is_pro) return json(403, { error: "Recurso exclusivo do plano Pro." });
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);

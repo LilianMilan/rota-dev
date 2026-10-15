@@ -1,6 +1,5 @@
 import type { Handler } from "@netlify/functions";
 import { supabaseAdmin } from "./_supabase.js";
-import { getClerkId, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -11,8 +10,8 @@ const json = (statusCode: number, body: unknown) => ({
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "GET") return json(405, { error: "Método não permitido." });
 
-  const clerk_id = await getClerkId(event);
-  if (!clerk_id) return unauthorized();
+  const clerk_id = event.queryStringParameters?.clerk_id;
+  if (!clerk_id) return json(400, { error: "clerk_id é obrigatório." });
 
   const { data, error } = await supabaseAdmin
     .from("users")
