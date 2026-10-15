@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
+import { apiFetch } from "../lib/api";
 
 const PRO_CACHE_KEY = "rota-dev-is-pro";
 
@@ -55,17 +56,10 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
   async function syncAndFetch() {
     if (!user) return;
 
-    const clerkId = user.id;
-    const email = user.primaryEmailAddress?.emailAddress ?? "";
-
     try {
-      await fetch("/api/sync-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: clerkId, email }),
-      });
+      await apiFetch("/api/sync-user", { method: "POST" });
 
-      const res = await fetch(`/api/user-status?clerk_id=${clerkId}`);
+      const res = await apiFetch("/api/user-status");
       if (res.ok) {
         const data = await res.json() as { is_pro: boolean; plan_count: number; plan_type: "monthly" | "lifetime" | null };
         updateIsPro(data.is_pro);
@@ -113,14 +107,13 @@ export function ProStatusProvider({ children }: { children: React.ReactNode }) {
       // Confirma a compra direto no Stripe pela session_id antes de liberar:
       // cartão volta "paid" (libera na hora); boleto volta "pending" (gerado,
       // mas só libera quando compensar). Depois sincroniza com o banco.
-      const email = user.primaryEmailAddress?.emailAddress ?? "";
       const sessionId = params.get("session_id") ?? undefined;
       void (async () => {
         try {
-          const res = await fetch("/api/confirm-subscription", {
+          const res = await apiFetch("/api/confirm-subscription", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ clerk_id: user.id, email, session_id: sessionId }),
+            body: JSON.stringify({ session_id: sessionId }),
           });
           const data = await res.json() as { is_pro: boolean; status?: string };
           if (data.is_pro) {

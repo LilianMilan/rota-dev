@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import { supabaseAdmin } from "./_supabase.js";
 import { asaas, isPixPaid, type AsaasPayment } from "./_asaas.js";
+import { getClerkId, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -12,9 +13,10 @@ const json = (statusCode: number, body: unknown) => ({
 // direto no Asaas (fonte da verdade) e libera o Pro — serve de rede de
 // segurança caso o webhook atrase.
 export const handler: Handler = async (event) => {
+  const clerkId = await getClerkId(event);
+  if (!clerkId) return unauthorized();
   const paymentId = event.queryStringParameters?.payment_id;
-  const clerkId = event.queryStringParameters?.clerk_id;
-  if (!paymentId || !clerkId) return json(400, { error: "payment_id e clerk_id são obrigatórios." });
+  if (!paymentId) return json(400, { error: "payment_id é obrigatório." });
 
   try {
     const payment = await asaas<AsaasPayment>(`/payments/${encodeURIComponent(paymentId)}`);

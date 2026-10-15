@@ -8,6 +8,7 @@ import DashboardHome from "./DashboardHome";
 import MeuPlano from "./MeuPlano";
 import AgenteIA from "./AgenteIA";
 import Progresso from "./Progresso";
+import { apiFetch } from "../lib/api";
 
 const NAV_ITEMS = [
   {
@@ -54,11 +55,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
     if (!user) return;
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/create-portal-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: user.id }),
-      });
+      const res = await apiFetch("/api/create-portal-session", { method: "POST" });
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) window.location.href = data.url;
     } finally {
@@ -178,11 +175,7 @@ export default function Dashboard() {
     if (!user) return;
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/create-portal-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clerk_id: user.id }),
-      });
+      const res = await apiFetch("/api/create-portal-session", { method: "POST" });
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) window.location.href = data.url;
     } finally {

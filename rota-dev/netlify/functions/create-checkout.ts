@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import Stripe from "stripe";
 import { LIFETIME_PRICE_CENTS } from "../../src/lib/pricing.js";
+import { getClerkId, getVerifiedEmail, unauthorized } from "./_auth.js";
 
 // Price do vitalício no Stripe — usado só pra achar o produto; o valor cobrado
 // vem de LIFETIME_PRICE_CENTS (assim o preço vive num lugar só).
@@ -27,12 +28,8 @@ export const handler: Handler = async (event) => {
 
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const { clerk_id, email } = JSON.parse(event.body || "{}") as {
-    clerk_id?: string;
-    email?: string;
-  };
-
-  if (!clerk_id || !email) return json(400, { error: "clerk_id e email são obrigatórios." });
+  const clerk_id = await getClerkId(event);
+  if (!clerk_id) return unauthorized();
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) return json(500, { error: "Stripe não configurado." });
@@ -41,6 +38,9 @@ export const handler: Handler = async (event) => {
   const baseUrl = process.env.VITE_APP_URL ?? "https://rotadev.app.br";
 
   try {
+    const email = await getVerifiedEmail(clerk_id);
+    if (!email) return json(400, { error: "Confirme seu e-mail antes de assinar." });
+
     const price = await stripe.prices.retrieve(LIFETIME_PRICE_ID);
     const product = typeof price.product === "string" ? price.product : price.product.id;
 

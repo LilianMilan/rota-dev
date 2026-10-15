@@ -1,6 +1,7 @@
 import type { Handler } from "@netlify/functions";
 import Stripe from "stripe";
 import { supabaseAdmin } from "./_supabase.js";
+import { getClerkId, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -11,8 +12,8 @@ const json = (statusCode: number, body: unknown) => ({
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const { clerk_id } = JSON.parse(event.body || "{}") as { clerk_id?: string };
-  if (!clerk_id) return json(400, { error: "clerk_id é obrigatório." });
+  const clerk_id = await getClerkId(event);
+  if (!clerk_id) return unauthorized();
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (!secretKey) return json(500, { error: "Stripe não configurado." });

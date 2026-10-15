@@ -1,5 +1,6 @@
 import type { Handler } from "@netlify/functions";
 import { supabaseAdmin } from "./_supabase.js";
+import { getClerkId, getVerifiedEmail, unauthorized } from "./_auth.js";
 
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
@@ -22,9 +23,12 @@ export const handler: Handler = async (event) => {
 
   if (event.httpMethod !== "POST") return json(405, { error: "Método não permitido." });
 
-  const { clerk_id, email } = JSON.parse(event.body || "{}") as { clerk_id?: string; email?: string };
+  const clerk_id = await getClerkId(event);
+  if (!clerk_id) return unauthorized();
 
-  if (!clerk_id || !email) return json(400, { error: "clerk_id e email são obrigatórios." });
+  // E-mail vem do Clerk (verificado) — é por ele que o portal do Stripe acha o cliente.
+  const email = await getVerifiedEmail(clerk_id);
+  if (!email) return json(400, { error: "E-mail ainda não verificado." });
 
   const { data, error } = await supabaseAdmin
     .from("users")

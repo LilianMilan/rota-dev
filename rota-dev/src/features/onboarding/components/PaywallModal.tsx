@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
 import PixButton from "../../pix/PixCheckout";
 import { PIX_ENABLED } from "../../../lib/pix";
 import { LIFETIME_PRICE_LABEL } from "../../../lib/pricing";
+import { apiFetch } from "../../../lib/api";
 
 const BULLETS = [
   "Plano completo personalizado",
@@ -17,7 +17,6 @@ type PaywallModalProps = {
 };
 
 export default function PaywallModal({ onContinueFree, blockFree = false }: PaywallModalProps) {
-  const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -25,14 +24,7 @@ export default function PaywallModal({ onContinueFree, blockFree = false }: Payw
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clerk_id: user?.id,
-          email: user?.primaryEmailAddress?.emailAddress,
-        }),
-      });
+      const res = await apiFetch("/api/create-checkout", { method: "POST" });
 
       const data = await res.json() as { url?: string; error?: string };
 

@@ -3,6 +3,7 @@ import { useUser } from "@clerk/clerk-react";
 import { LIFETIME_PRICE_LABEL } from "../lib/pricing";
 import PixButton from "../features/pix/PixCheckout";
 import { PIX_ENABLED } from "../lib/pix";
+import { apiFetch } from "../lib/api";
 
 export default function RenewalPage() {
   const { user } = useUser();
@@ -14,14 +15,7 @@ export default function RenewalPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clerk_id: user.id,
-          email: user.primaryEmailAddress?.emailAddress,
-        }),
-      });
+      const res = await apiFetch("/api/create-checkout", { method: "POST" });
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) {
         window.location.href = data.url;
