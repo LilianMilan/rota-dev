@@ -130,7 +130,7 @@ export default function AgenteIA() {
       const data = await res.json() as { reply?: string; error?: string };
       setMessages(prev => [...prev, {
         role: "agent",
-        text: data.reply ?? "Não consegui responder agora. Tenta de novo.",
+        text: data.reply ?? data.error ?? "Não consegui responder agora. Tenta de novo.",
       }]);
     } catch {
       setMessages(prev => [...prev, { role: "agent", text: "Erro de conexão. Tenta de novo." }]);

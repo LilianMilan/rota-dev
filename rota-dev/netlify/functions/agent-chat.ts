@@ -4,6 +4,10 @@ import { supabaseAdmin } from "./_supabase.js";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+// Mensagens por dia (fuso de Brasília) para cada Pro — vitalício barato não
+// pode virar custo de API ilimitado. Contador em supabase/agent_usage.sql.
+const DAILY_MESSAGE_LIMIT = 30;
+
 const json = (statusCode: number, body: unknown) => ({
   statusCode,
   headers: { "Content-Type": "application/json" },
@@ -22,28 +26,42 @@ export const handler: Handler = async (event) => {
     return json(400, { error: "clerk_id e messages são obrigatórios." });
   }
 
+  // Chat é recurso Pro: confere no banco, não confia no front.
+  const { data: user } = await supabaseAdmin
+    .from("users")
+    .select("id, is_pro")
+    .eq("clerk_id", clerk_id)
+    .single();
+
+  if (!user?.is_pro) {
+    return json(403, { error: "O agente IA é exclusivo do plano Pro. Desbloqueie em Meu plano. 🦊" });
+  }
+
+  const { data: allowed, error: usageError } = await supabaseAdmin.rpc("use_agent_message", {
+    p_clerk_id: clerk_id,
+    p_limit: DAILY_MESSAGE_LIMIT,
+  });
+  // Se o contador falhar (ex.: SQL ainda não rodado), deixa passar em vez de
+  // derrubar o chat de quem pagou — mas registra pra aparecer no log.
+  if (usageError) console.error("agent-chat: contador de uso falhou", usageError.message);
+  else if (!allowed) {
+    return json(429, { error: `Você chegou ao limite de ${DAILY_MESSAGE_LIMIT} mensagens de hoje. Amanhã tem mais! 🦊` });
+  }
+
   let planContext = "";
   try {
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("clerk_id", clerk_id)
+    const { data: planRow } = await supabaseAdmin
+      .from("plans")
+      .select("content")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
       .single();
 
-    if (user) {
-      const { data: planRow } = await supabaseAdmin
-        .from("plans")
-        .select("content")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (planRow?.content) {
-        const { plan } = planRow.content as { plan: { planTitle: string; days: { day: number; title: string; tasks: string[] }[] } };
-        if (plan) {
-          planContext = `\n\nPlano atual do usuário: "${plan.planTitle}"\nDias: ${plan.days.map(d => `Dia ${d.day}: ${d.title} (${d.tasks.join(", ")})`).join(" | ")}`;
-        }
+    if (planRow?.content) {
+      const { plan } = planRow.content as { plan: { planTitle: string; days: { day: number; title: string; tasks: string[] }[] } };
+      if (plan) {
+        planContext = `\n\nPlano atual do usuário: "${plan.planTitle}"\nDias: ${plan.days.map(d => `Dia ${d.day}: ${d.title} (${d.tasks.join(", ")})`).join(" | ")}`;
       }
     }
   } catch { /* sem plano, responde mesmo assim */ }
